@@ -1,0 +1,16 @@
+<resources>
+    <!-- App -->
+    <string name="app_name">Watchive</string>
+
+    <!-- Splash -->
+    <string name="splash_title">WATCHIVE</string>
+
+    <string name="login_title">Welcome Back</string>
+    <string name="login_subtitle">Log in to continue</string>
+    <string name="hint_email">Email</string>
+    <string name="hint_password">Password</string>
+    <string name="btn_login">Login</string>
+    <string name="dont_have_account">Don’t have an account?</string>
+    <string name="signup_here">Sign up here</string>
+    <string name="lupa_password"><u>Lupa Password?</u></string>
+</resources>

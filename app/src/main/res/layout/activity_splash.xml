@@ -1,0 +1,32 @@
+<?xml version="1.0" encoding="utf-8"?>
+<RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent">
+
+    <View
+        android:id="@+id/gradientBg"
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"
+        android:background="@color/black" />
+
+    <ImageView
+        android:id="@+id/logoWatchive"
+        android:layout_width="140dp"
+        android:layout_height="140dp"
+        android:layout_centerHorizontal="true"
+        android:layout_centerVertical="true"
+        android:src="@drawable/logo_watchive" />
+
+    <TextView
+        android:id="@+id/textWatchive"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_below="@id/logoWatchive"
+        android:layout_marginTop="12dp"
+        android:layout_centerHorizontal="true"
+        android:text="@string/splash_title"
+        android:textColor="@color/brand"
+        android:textSize="28sp"
+        android:textStyle="bold"
+        android:letterSpacing="0.1" />
+</RelativeLayout>
