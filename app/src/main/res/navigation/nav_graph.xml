@@ -47,4 +47,13 @@
             app:argType="integer" />
     </fragment>
 
+    <fragment
+        android:id="@+id/selectMoviesFragment"
+        android:name="com.example.watchive.ui.watchlist.SelectMoviesFragment"
+        android:label="Select Movies">
+        <argument
+            android:name="folderId"
+            app:argType="integer" />
+    </fragment>
+
 </navigation>

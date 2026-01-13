@@ -1,12 +1,12 @@
 package com.example.watchive.ui.detail
 
+import android.content.Intent
 import android.content.res.ColorStateList
 import android.os.Bundle
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
 import android.widget.Toast
-import androidx.appcompat.app.AlertDialog
 import androidx.core.content.ContextCompat
 import androidx.fragment.app.Fragment
 import androidx.lifecycle.lifecycleScope
@@ -19,8 +19,11 @@ import com.example.watchive.data.local.FolderMovieJoin
 import com.example.watchive.data.local.WatchlistRepository
 import com.example.watchive.data.remote.RetrofitClient
 import com.example.watchive.data.remote.model.Movie
+import com.example.watchive.databinding.BottomSheetAddToPlaylistBinding
 import com.example.watchive.databinding.FragmentMovieDetailBinding
-import kotlinx.coroutines.CoroutineScope
+import com.example.watchive.ui.watchlist.CreateFolderActivity
+import com.example.watchive.ui.watchlist.FolderSelectionAdapter
+import com.google.android.material.bottomsheet.BottomSheetDialog
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
@@ -32,6 +35,8 @@ class MovieDetailFragment : Fragment() {
 
     private lateinit var actorAdapter: ActorAdapter
     private lateinit var watchlistRepo: WatchlistRepository
+    private var currentMovie: Movie? = null
+    private var isSaved = false
 
     companion object {
         const val ARG_MOVIE_ID = "movieId"
@@ -52,8 +57,6 @@ class MovieDetailFragment : Fragment() {
         binding.btnBack.setOnClickListener { requireActivity().onBackPressedDispatcher.onBackPressed() }
 
         watchlistRepo = WatchlistRepository.create(requireContext())
-        var currentMovie: Movie? = null
-        var isSaved = false
 
         actorAdapter = ActorAdapter(emptyList())
         binding.rvActors.apply {
@@ -77,57 +80,71 @@ class MovieDetailFragment : Fragment() {
 
                         val exists = withContext(Dispatchers.IO) { watchlistRepo.exists(mf.id) }
                         isSaved = exists
-                        binding.btnBookmark.setImageResource(if (isSaved) R.drawable.ic_bookmark_filled else R.drawable.ic_bookmark_outline)
+                        updateBookmarkIcon()
 
                         binding.btnBookmark.setOnClickListener {
-                            CoroutineScope(Dispatchers.IO).launch {
-                                if (isSaved) {
-                                    watchlistRepo.remove(mf.id)
-                                    isSaved = false
-                                } else {
-                                    watchlistRepo.add(mf)
-                                    isSaved = true
-                                }
-                                withContext(Dispatchers.Main) { 
-                                    binding.btnBookmark.setImageResource(if (isSaved) R.drawable.ic_bookmark_filled else R.drawable.ic_bookmark_outline) 
-                                }
-                            }
+                            showAddToPlaylistBottomSheet(mf)
                         }
                     }
                 }
             }
-        }
-
-        // Setup "Add to Folder" button (Assuming there's a button, or use bookmark long click)
-        binding.btnBookmark.setOnLongClickListener {
-            currentMovie?.let { showAddToFolderDialog(it.id) }
-            true
         }
     }
 
-    private fun showAddToFolderDialog(movieId: Int) {
+    private fun updateBookmarkIcon() {
+        binding.btnBookmark.setImageResource(if (isSaved) R.drawable.ic_bookmark_filled else R.drawable.ic_bookmark_outline)
+    }
+
+    private fun showAddToPlaylistBottomSheet(movie: Movie) {
+        val bottomSheetDialog = BottomSheetDialog(requireContext())
+        val sheetBinding = BottomSheetAddToPlaylistBinding.inflate(layoutInflater)
+        bottomSheetDialog.setContentView(sheetBinding.root)
+
+        // New Playlist button
+        sheetBinding.btnNewPlaylist.setOnClickListener {
+            bottomSheetDialog.dismiss()
+            val intent = Intent(requireContext(), CreateFolderActivity::class.java)
+            startActivity(intent)
+        }
+
+        // Save to Liked Movies button
+        sheetBinding.btnLikedMovies.setOnClickListener {
+            lifecycleScope.launch(Dispatchers.IO) {
+                if (isSaved) {
+                    watchlistRepo.remove(movie.id)
+                    isSaved = false
+                } else {
+                    watchlistRepo.add(movie)
+                    isSaved = true
+                }
+                withContext(Dispatchers.Main) {
+                    updateBookmarkIcon()
+                    bottomSheetDialog.dismiss()
+                    val msg = if (isSaved) "Added to Liked Movies" else "Removed from Liked Movies"
+                    Toast.makeText(context, msg, Toast.LENGTH_SHORT).show()
+                }
+            }
+        }
+
+        // Folders List
         val db = AppDatabase.getInstance(requireContext())
         lifecycleScope.launch {
             val folders = withContext(Dispatchers.IO) { db.folderDao().getAllFoldersStatic() }
-            if (folders.isNullOrEmpty()) {
-                Toast.makeText(context, "Belum ada folder. Buat folder di halaman Watchlist.", Toast.LENGTH_SHORT).show()
-                return@launch
-            }
-
-            val folderNames = folders.map { it.title }.toTypedArray()
-            AlertDialog.Builder(requireContext())
-                .setTitle("Tambah ke Folder")
-                .setItems(folderNames) { _, which ->
-                    val selectedFolder = folders[which]
+            if (folders.isNotEmpty()) {
+                sheetBinding.rvFoldersList.layoutManager = LinearLayoutManager(context)
+                sheetBinding.rvFoldersList.adapter = FolderSelectionAdapter(folders) { selectedFolder ->
                     lifecycleScope.launch(Dispatchers.IO) {
-                        db.folderDao().addMovieToFolder(FolderMovieJoin(selectedFolder.id, movieId))
+                        db.folderDao().addMovieToFolder(FolderMovieJoin(selectedFolder.id, movie.id))
                         withContext(Dispatchers.Main) {
-                            Toast.makeText(context, "Berhasil ditambahkan ke ${selectedFolder.title}", Toast.LENGTH_SHORT).show()
+                            Toast.makeText(context, "Added to ${selectedFolder.title}", Toast.LENGTH_SHORT).show()
+                            bottomSheetDialog.dismiss()
                         }
                     }
                 }
-                .show()
+            }
         }
+
+        bottomSheetDialog.show()
     }
 
     private fun bindBasicFields(movie: Movie) {

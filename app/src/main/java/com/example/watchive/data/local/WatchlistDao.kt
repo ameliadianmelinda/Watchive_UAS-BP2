@@ -12,6 +12,9 @@ interface WatchlistDao {
     @Query("SELECT * FROM watchlist")
     fun getAll(): LiveData<List<WatchlistMovie>>
 
+    @Query("SELECT * FROM watchlist")
+    suspend fun getAllStatic(): List<WatchlistMovie>
+
     @Insert(onConflict = OnConflictStrategy.REPLACE)
     suspend fun insert(movie: WatchlistMovie)
 
@@ -21,4 +24,3 @@ interface WatchlistDao {
     @Query("SELECT EXISTS(SELECT 1 FROM watchlist WHERE id = :movieId)")
     suspend fun exists(movieId: Int): Boolean
 }
-

@@ -1,6 +1,7 @@
 package com.example.watchive.ui.adapter
 
 import android.view.LayoutInflater
+import android.view.View
 import android.view.ViewGroup
 import androidx.recyclerview.widget.DiffUtil
 import androidx.recyclerview.widget.ListAdapter
@@ -11,8 +12,10 @@ import com.example.watchive.R
 import com.example.watchive.data.remote.model.Movie
 import com.example.watchive.databinding.ItemMovieHorizontalBinding
 
-class MovieAdapter(private val listener: (Movie) -> Unit) :
-    ListAdapter<Movie, MovieAdapter.MovieViewHolder>(DIFF) {
+class MovieAdapter(
+    private val onLongClick: ((Movie) -> Unit)? = null,
+    private val listener: (Movie) -> Unit
+) : ListAdapter<Movie, MovieAdapter.MovieViewHolder>(DIFF) {
 
     companion object {
         private val DIFF = object : DiffUtil.ItemCallback<Movie>() {
@@ -30,6 +33,10 @@ class MovieAdapter(private val listener: (Movie) -> Unit) :
         val movie = getItem(position)
         holder.bind(movie)
         holder.itemView.setOnClickListener { listener(movie) }
+        holder.itemView.setOnLongClickListener {
+            onLongClick?.invoke(movie)
+            true
+        }
     }
 
     fun updateData(newMovies: List<Movie>) {

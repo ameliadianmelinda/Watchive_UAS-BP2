@@ -5,14 +5,22 @@ import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
 import android.widget.EditText
+import android.widget.Toast
 import androidx.appcompat.app.AlertDialog
 import androidx.fragment.app.Fragment
 import androidx.fragment.app.viewModels
+import androidx.lifecycle.lifecycleScope
 import androidx.navigation.fragment.findNavController
 import androidx.recyclerview.widget.LinearLayoutManager
 import com.example.watchive.R
+import com.example.watchive.data.local.AppDatabase
+import com.example.watchive.data.local.FolderMovieJoin
+import com.example.watchive.data.remote.model.Movie
 import com.example.watchive.databinding.FragmentFolderDetailBinding
 import com.example.watchive.ui.adapter.MovieAdapter
+import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.launch
+import kotlinx.coroutines.withContext
 
 class FolderDetailFragment : Fragment() {
 
@@ -49,12 +57,29 @@ class FolderDetailFragment : Fragment() {
     }
 
     private fun setupRecyclerView() {
-        adapter = MovieAdapter { movie ->
-            val bundle = Bundle().apply { putInt("movieId", movie.id) }
-            findNavController().navigate(R.id.movieDetailFragment, bundle)
-        }
+        adapter = MovieAdapter(
+            onLongClick = { movie ->
+                showRemoveMovieFromFolderDialog(movie)
+            },
+            listener = { movie ->
+                val bundle = Bundle().apply { putInt("movieId", movie.id) }
+                findNavController().navigate(resId = R.id.movieDetailFragment, args = bundle)
+            }
+        )
         binding.rvFolderMovies.layoutManager = LinearLayoutManager(context)
         binding.rvFolderMovies.adapter = adapter
+    }
+
+    private fun showRemoveMovieFromFolderDialog(movie: Movie) {
+        AlertDialog.Builder(requireContext())
+            .setTitle("Hapus dari Folder")
+            .setMessage("Hapus '${movie.title}' dari folder ini?")
+            .setPositiveButton("Hapus") { _, _ ->
+                viewModel.removeMovieFromFolder(folderId, movie.id)
+                Toast.makeText(context, "${movie.title} dihapus dari folder", Toast.LENGTH_SHORT).show()
+            }
+            .setNegativeButton("Batal", null)
+            .show()
     }
 
     private fun observeViewModel() {
@@ -77,6 +102,36 @@ class FolderDetailFragment : Fragment() {
 
         binding.btnMore.setOnClickListener {
             showMenuDialog()
+        }
+
+        binding.btnAddMovieToFolder.setOnClickListener {
+            showAddMovieToFolderDialog()
+        }
+    }
+
+    private fun showAddMovieToFolderDialog() {
+        val db = AppDatabase.getInstance(requireContext())
+        lifecycleScope.launch {
+            val allWatchlistMovies = withContext(Dispatchers.IO) { db.watchlistDao().getAllStatic() }
+            val moviesInFolder = viewModel.getMoviesInFolder(folderId).value ?: emptyList()
+            val moviesInFolderIds = moviesInFolder.map { it.id }.toSet()
+            
+            val availableMovies = allWatchlistMovies.filter { it.id !in moviesInFolderIds }
+
+            if (availableMovies.isEmpty()) {
+                Toast.makeText(context, "Semua film di watchlist sudah ada di folder ini", Toast.LENGTH_SHORT).show()
+                return@launch
+            }
+
+            val movieTitles = availableMovies.map { it.title }.toTypedArray()
+            AlertDialog.Builder(requireContext())
+                .setTitle("Tambah Film ke Folder")
+                .setItems(movieTitles) { _, which ->
+                    val selectedMovie = availableMovies[which]
+                    viewModel.addMovieToFolder(folderId, selectedMovie.id)
+                    Toast.makeText(context, "${selectedMovie.title} ditambahkan", Toast.LENGTH_SHORT).show()
+                }
+                .show()
         }
     }
 

@@ -5,6 +5,7 @@ import android.os.Bundle
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
+import androidx.appcompat.app.AlertDialog
 import androidx.fragment.app.Fragment
 import androidx.fragment.app.viewModels
 import androidx.navigation.fragment.findNavController
@@ -42,11 +43,16 @@ class WatchlistFragment : Fragment() {
     }
 
     private fun setupRecyclerViews() {
-        // Setup Movies Adapter
-        movieAdapter = MovieAdapter { movie ->
-            val bundle = Bundle().apply { putInt("movieId", movie.id) }
-            findNavController().navigate(R.id.movieDetailFragment, bundle)
-        }
+        // Setup Movies Adapter with Long Click for Deletion
+        movieAdapter = MovieAdapter(
+            onLongClick = { movie ->
+                showDeleteMovieDialog(movie.id, movie.title)
+            },
+            listener = { movie ->
+                val bundle = Bundle().apply { putInt("movieId", movie.id) }
+                findNavController().navigate(resId = R.id.movieDetailFragment, args = bundle)
+            }
+        )
         binding.rvWatchlist.layoutManager = LinearLayoutManager(context)
         binding.rvWatchlist.adapter = movieAdapter
 
@@ -56,22 +62,47 @@ class WatchlistFragment : Fragment() {
         binding.rvFolders.adapter = folderAdapter
     }
 
-    private fun observeViewModel() {
-        // Observe Movies
-        viewModel.watchlist.observe(viewLifecycleOwner) { list ->
-            if (list.isNullOrEmpty()) {
-                binding.emptyState.visibility = View.VISIBLE
-                binding.rvWatchlist.visibility = View.GONE
-            } else {
-                binding.emptyState.visibility = View.GONE
-                binding.rvWatchlist.visibility = View.VISIBLE
-                val movies = list.map { it.toMovie() }
-                movieAdapter.submitList(movies)
+    private fun showDeleteMovieDialog(movieId: Int, title: String) {
+        AlertDialog.Builder(requireContext())
+            .setTitle("Hapus Film")
+            .setMessage("Apakah Anda yakin ingin menghapus '$title' dari watchlist?")
+            .setPositiveButton("Hapus") { _, _ ->
+                viewModel.remove(movieId)
             }
+            .setNegativeButton("Batal", null)
+            .show()
+    }
+
+    private fun observeViewModel() {
+        viewModel.watchlist.observe(viewLifecycleOwner) { movies ->
+            val folders = viewModel.folders.value ?: emptyList()
+            updateUI(movies ?: emptyList(), folders)
         }
 
-        // Observe Folders
         viewModel.folders.observe(viewLifecycleOwner) { folders ->
+            val movies = viewModel.watchlist.value ?: emptyList()
+            updateUI(movies, folders ?: emptyList())
+        }
+    }
+
+    private fun updateUI(movies: List<com.example.watchive.data.local.WatchlistMovie>, folders: List<com.example.watchive.data.local.WatchlistFolder>) {
+        val isMoviesEmpty = movies.isEmpty()
+        val isFoldersEmpty = folders.isEmpty()
+
+        binding.tvFolderHeader.visibility = if (isFoldersEmpty) View.GONE else View.VISIBLE
+        binding.rvFolders.visibility = if (isFoldersEmpty) View.GONE else View.VISIBLE
+        
+        binding.tvMovieHeader.visibility = if (isMoviesEmpty) View.GONE else View.VISIBLE
+        binding.rvWatchlist.visibility = if (isMoviesEmpty) View.GONE else View.VISIBLE
+
+        if (isMoviesEmpty && isFoldersEmpty) {
+            binding.emptyState.visibility = View.VISIBLE
+            binding.layoutContent.visibility = View.GONE
+        } else {
+            binding.emptyState.visibility = View.GONE
+            binding.layoutContent.visibility = View.VISIBLE
+            
+            movieAdapter.submitList(movies.map { it.toMovie() })
             folderAdapter.submitList(folders)
         }
     }
@@ -79,7 +110,7 @@ class WatchlistFragment : Fragment() {
     private fun setupListeners() {
         binding.btnExplore.setOnClickListener {
             val bundle = Bundle().apply { putBoolean("scroll_to_top", true) }
-            findNavController().navigate(R.id.homeFragment, bundle)
+            findNavController().navigate(resId = R.id.homeFragment, args = bundle)
         }
 
         binding.btnAdd.setOnClickListener {

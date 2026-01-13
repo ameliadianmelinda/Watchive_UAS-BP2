@@ -27,7 +27,7 @@
                 android:backgroundTint="#6B4CE6"
                 android:scaleType="center"
                 android:padding="8dp"
-                android:src="@android:drawable/ic_media_previous"
+                android:src="@drawable/ic_back"
                 android:contentDescription="@string/back"
                 android:background="@drawable/back_button_background" />
 
@@ -43,43 +43,48 @@
             android:layout_marginTop="12dp"
             app:cardBackgroundColor="#FFFFFF">
 
-            <FrameLayout
+            <ImageView
+                android:id="@+id/img_poster"
                 android:layout_width="match_parent"
-                android:layout_height="match_parent">
-
-                <ImageView
-                    android:id="@+id/img_poster"
-                    android:layout_width="match_parent"
-                    android:layout_height="match_parent"
-                    android:scaleType="centerCrop"
-                    tools:src="@tools:sample/avatars"
-                    android:contentDescription="@string/back" />
-
-                <ImageButton
-                    android:id="@+id/btn_bookmark"
-                    android:layout_width="44dp"
-                    android:layout_height="44dp"
-                    android:layout_gravity="top|end"
-                    android:layout_margin="8dp"
-                    android:backgroundTint="@android:color/transparent"
-                    android:src="@drawable/ic_bookmark_outline"
-                    android:contentDescription="Bookmark"
-                    android:tint="@color/white" />
-
-            </FrameLayout>
+                android:layout_height="match_parent"
+                android:scaleType="centerCrop"
+                tools:src="@tools:sample/avatars"
+                android:contentDescription="Movie Poster" />
 
         </com.google.android.material.card.MaterialCardView>
 
-        <!-- Title and metadata -->
-        <TextView
-            android:id="@+id/tv_title"
+        <!-- Title and Save button row -->
+        <RelativeLayout
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:textColor="#FFFFFF"
-            android:textSize="20sp"
-            android:textStyle="bold"
-            android:layout_marginTop="12dp"
-            tools:text="10 Things I Hate About You" />
+            android:layout_marginTop="16dp">
+
+            <TextView
+                android:id="@+id/tv_title"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_toStartOf="@+id/btn_bookmark"
+                android:layout_alignParentStart="true"
+                android:layout_marginEnd="12dp"
+                android:textColor="#FFFFFF"
+                android:textSize="22sp"
+                android:textStyle="bold"
+                tools:text="10 Things I Hate About You" />
+
+            <ImageButton
+                android:id="@+id/btn_bookmark"
+                android:layout_width="32dp"
+                android:layout_height="32dp"
+                android:layout_alignParentEnd="true"
+                android:layout_centerVertical="true"
+                android:background="?attr/selectableItemBackgroundBorderless"
+                android:src="@drawable/ic_bookmark_outline"
+                android:contentDescription="Bookmark"
+                android:scaleType="fitCenter"
+                android:tint="@color/white"
+                app:tint="@color/white" />
+
+        </RelativeLayout>
 
         <LinearLayout
             android:layout_width="match_parent"

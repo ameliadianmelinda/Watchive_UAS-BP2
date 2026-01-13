@@ -41,4 +41,11 @@ interface WatchlistFolderDao {
         WHERE folder_movie_join.folderId = :folderId
     """)
     fun getMoviesInFolder(folderId: Int): LiveData<List<WatchlistMovie>>
+
+    @Query("""
+        SELECT watchlist.* FROM watchlist 
+        INNER JOIN folder_movie_join ON watchlist.id = folder_movie_join.movieId 
+        WHERE folder_movie_join.folderId = :folderId
+    """)
+    suspend fun getMoviesInFolderStatic(folderId: Int): List<WatchlistMovie>
 }
