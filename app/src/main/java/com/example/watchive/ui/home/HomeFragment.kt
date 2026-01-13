@@ -7,12 +7,18 @@ import android.view.ViewGroup
 import android.widget.Toast
 import androidx.fragment.app.Fragment
 import androidx.fragment.app.viewModels
+import androidx.lifecycle.lifecycleScope
+import androidx.navigation.fragment.findNavController
 import androidx.recyclerview.widget.LinearLayoutManager
 import coil.load
 import com.example.watchive.R
 import com.example.watchive.data.remote.model.Movie
 import com.example.watchive.databinding.FragmentHomeBinding
 import com.example.watchive.ui.adapter.MovieAdapter
+import com.example.watchive.data.remote.RetrofitClient
+import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.launch
+import kotlinx.coroutines.withContext
 
 class HomeFragment : Fragment() {
 
@@ -38,10 +44,27 @@ class HomeFragment : Fragment() {
 
         setupRecyclerViews()
         observeViewModel()
+        handleArgumentsForScroll()
+        
+        // Setup search bar click
+        binding.searchBar.setFocusable(false) // Disable keyboard on Home
+        binding.searchBar.setOnClickListener {
+            // Navigate directly to searchFragment ID to avoid unresolved action reference
+            findNavController().navigate(resId = R.id.searchFragment)
+        }
+    }
+
+    private fun handleArgumentsForScroll() {
+        val shouldScroll = arguments?.getBoolean("scroll_to_top") ?: false
+        if (shouldScroll) {
+            binding.scrollHome.post {
+                binding.scrollHome.smoothScrollTo(0, 0)
+            }
+        }
     }
 
     private fun setupRecyclerViews() {
-        recommendationsAdapter = MovieAdapter(emptyList()) { movie ->
+        recommendationsAdapter = MovieAdapter { movie ->
             onMovieClicked(movie)
         }
         binding.rvRecommendations.apply {
@@ -49,7 +72,7 @@ class HomeFragment : Fragment() {
             adapter = recommendationsAdapter
         }
 
-        newReleasesAdapter = MovieAdapter(emptyList()) { movie ->
+        newReleasesAdapter = MovieAdapter { movie ->
             onMovieClicked(movie)
         }
         binding.rvNewReleases.apply {
@@ -59,6 +82,23 @@ class HomeFragment : Fragment() {
     }
 
     private fun observeViewModel() {
+        viewModel.isLoading.observe(viewLifecycleOwner) { isLoading ->
+            if (isLoading) {
+                binding.shimmerFeatured.startShimmer()
+                binding.shimmerRecommendations.startShimmer()
+                binding.shimmerNewReleases.startShimmer()
+            } else {
+                binding.shimmerFeatured.stopShimmer()
+                binding.shimmerFeatured.hideShimmer()
+                binding.shimmerRecommendations.stopShimmer()
+                binding.shimmerRecommendations.hideShimmer()
+                binding.shimmerNewReleases.stopShimmer()
+                binding.shimmerNewReleases.hideShimmer()
+                
+                binding.progressBar.visibility = View.GONE
+            }
+        }
+
         viewModel.popularMovies.observe(viewLifecycleOwner) { movies ->
             if (!movies.isNullOrEmpty()) {
                 setupFeaturedMovie(movies[0])
@@ -66,15 +106,21 @@ class HomeFragment : Fragment() {
         }
 
         viewModel.topRatedMovies.observe(viewLifecycleOwner) { movies ->
-            movies?.let { recommendationsAdapter.updateData(it) }
+            movies?.let { 
+                recommendationsAdapter.submitList(it)
+            }
         }
 
         viewModel.nowPlayingMovies.observe(viewLifecycleOwner) { movies ->
-            movies?.let { newReleasesAdapter.updateData(it) }
+            movies?.let { 
+                newReleasesAdapter.submitList(it)
+            }
         }
 
         viewModel.errorMessage.observe(viewLifecycleOwner) { error ->
-            error?.let { Toast.makeText(context, it, Toast.LENGTH_LONG).show() }
+            if (!error.isNullOrEmpty()) {
+                Toast.makeText(context, error, Toast.LENGTH_LONG).show()
+            }
         }
     }
 
@@ -82,9 +128,42 @@ class HomeFragment : Fragment() {
         binding.featuredMovieTitle.text = movie.title
         binding.featuredMovieRating.rating = (movie.voteAverage / 2).toFloat()
         
+        val genreName = when (movie.genreIds?.firstOrNull()) {
+            28 -> "Action"
+            12 -> "Adventure"
+            16 -> "Animation"
+            35 -> "Comedy"
+            80 -> "Crime"
+            18 -> "Drama"
+            10751 -> "Family"
+            14 -> "Fantasy"
+            27 -> "Horror"
+            10749 -> "Romance"
+            878 -> "Sci-Fi"
+            53 -> "Thriller"
+            else -> "Genre"
+        }
+        binding.featuredMovieGenre.text = genreName
+        
         val imageUrl = "https://image.tmdb.org/t/p/w500${movie.posterPath}"
         binding.featuredMoviePoster.load(imageUrl) {
             crossfade(true)
+            placeholder(R.drawable.login_bg_gradient)
+        }
+
+        lifecycleScope.launch {
+            try {
+                val resp = withContext(Dispatchers.IO) { 
+                    RetrofitClient.instance.getMovieDetails(movie.id) 
+                }
+                if (resp.isSuccessful) {
+                    val details = resp.body()
+                    val director = details?.credits?.crew?.find { it.job?.equals("Director", true) == true }?.name
+                    binding.featuredMovieDirector.text = director ?: ""
+                }
+            } catch (e: Exception) {
+                // Ignore
+            }
         }
         
         binding.featuredMovieCard.setOnClickListener {
@@ -93,8 +172,8 @@ class HomeFragment : Fragment() {
     }
 
     private fun onMovieClicked(movie: Movie) {
-        Toast.makeText(context, "Clicked: ${movie.title}", Toast.LENGTH_SHORT).show()
-        // Kita akan tambahkan navigasi ke detail film nanti
+        val bundle = Bundle().apply { putInt("movieId", movie.id) }
+        findNavController().navigate(resId = R.id.movieDetailFragment, args = bundle)
     }
 
     override fun onDestroyView() {

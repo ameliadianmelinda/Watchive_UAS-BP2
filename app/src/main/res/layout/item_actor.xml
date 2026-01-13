@@ -1,0 +1,40 @@
+<?xml version="1.0" encoding="utf-8"?>
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:layout_width="wrap_content"
+    android:layout_height="match_parent"
+    android:orientation="vertical"
+    android:padding="8dp"
+    android:gravity="center">
+
+    <ImageView
+        android:id="@+id/img_actor"
+        android:layout_width="72dp"
+        android:layout_height="72dp"
+        android:scaleType="centerCrop"
+        android:background="@drawable/actor_image_bg"
+        tools:src="@tools:sample/avatars"
+        android:contentDescription="Actor" />
+
+    <TextView
+        android:id="@+id/tv_actor_name"
+        android:layout_width="72dp"
+        android:layout_height="wrap_content"
+        android:layout_marginTop="8dp"
+        android:textColor="#FFFFFF"
+        android:textSize="12sp"
+        android:gravity="center"
+        android:maxLines="2"
+        android:ellipsize="end"
+        tools:text="Julia Stiles" />
+
+    <TextView
+        android:id="@+id/tv_actor_role"
+        android:layout_width="72dp"
+        android:layout_height="wrap_content"
+        android:textColor="#BDB6C7"
+        android:textSize="10sp"
+        android:gravity="center"
+        tools:text="Kat Stratford" />
+
+</LinearLayout>

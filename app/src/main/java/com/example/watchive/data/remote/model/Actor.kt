@@ -1,7 +1,10 @@
 package com.example.watchive.data.remote.model
 
+import android.os.Parcelable
 import com.google.gson.annotations.SerializedName
+import kotlinx.parcelize.Parcelize
 
+@Parcelize
 data class Actor(
     @SerializedName("id")
     val id: Int,
@@ -12,4 +15,4 @@ data class Actor(
     // The path to the actor's profile picture
     @SerializedName("profile_path")
     val profilePath: String?
-)
+) : Parcelable

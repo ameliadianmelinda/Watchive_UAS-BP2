@@ -13,4 +13,24 @@
     <string name="dont_have_account">Don’t have an account?</string>
     <string name="signup_here">Sign up here</string>
     <string name="lupa_password"><u>Lupa Password?</u></string>
+    <string name="synopsis">Sinopsis</string>
+    <string name="actors">Aktor</string>
+    <string name="back">Back</string>
+    <string name="year_director_format">%1$s - Directed by</string>
+    <string name="year_director_director_format">%1$s - Directed by %2$s</string>
+
+    <!-- Watchlist -->
+    <string name="watchlist_title">Watchlist</string>
+    <string name="watchlist_search_hint">Cari di Daftar Tontonan</string>
+    <string name="watchlist_empty_title">Daftar pantauan Anda kosong</string>
+    <string name="watchlist_empty_sub">Tambahkan film dari halaman beranda ke mulailah mengumpulkan favorit Anda.</string>
+    <string name="watchlist_explore">Jelajahi Film</string>
+    <string name="add">Add</string>
+    <string name="search">Search</string>
+    <!-- Home strings -->
+    <string name="search_hint">Cari Film</string>
+    <string name="popular_title">Film Populer</string>
+    <string name="recommendations_title">Rekomendasi Untukmu</string>
+    <string name="new_releases_title">Baru Rilis</string>
+    <string name="year_format">(%1$s)</string>
 </resources>

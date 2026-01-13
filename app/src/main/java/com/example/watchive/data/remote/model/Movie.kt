@@ -1,7 +1,10 @@
 package com.example.watchive.data.remote.model
 
+import android.os.Parcelable
 import com.google.gson.annotations.SerializedName
+import kotlinx.parcelize.Parcelize
 
+@Parcelize
 data class Movie(
     @SerializedName("id")
     val id: Int,
@@ -25,5 +28,8 @@ data class Movie(
     val genreIds: List<Int>?,
 
     @SerializedName("genres")
-    val genres: List<Genre>?
-)
+    val genres: List<Genre>?,
+
+    @SerializedName("credits")
+    val credits: CreditsResponse?
+) : Parcelable

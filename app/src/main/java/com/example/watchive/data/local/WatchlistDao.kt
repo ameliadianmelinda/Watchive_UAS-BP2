@@ -1,22 +1,24 @@
 package com.example.watchive.data.local
 
+import androidx.lifecycle.LiveData
 import androidx.room.Dao
 import androidx.room.Insert
 import androidx.room.OnConflictStrategy
 import androidx.room.Query
-import kotlinx.coroutines.flow.Flow
+import androidx.room.Delete
 
 @Dao
 interface WatchlistDao {
+    @Query("SELECT * FROM watchlist")
+    fun getAll(): LiveData<List<WatchlistMovie>>
+
     @Insert(onConflict = OnConflictStrategy.REPLACE)
-    suspend fun addToWatchlist(watchlist: Watchlist)
+    suspend fun insert(movie: WatchlistMovie)
 
-    @Query("SELECT * FROM watchlist WHERE userId = :userId")
-    fun getWatchlistForUser(userId: Int): Flow<List<Watchlist>>
+    @Query("DELETE FROM watchlist WHERE id = :movieId")
+    suspend fun deleteById(movieId: Int)
 
-    @Query("SELECT count(*) FROM watchlist WHERE userId = :userId AND movieId = :movieId")
-    suspend fun isOnWatchlist(userId: Int, movieId: Int): Int
-
-    @Query("DELETE FROM watchlist WHERE userId = :userId AND movieId = :movieId")
-    suspend fun removeFromWatchlist(userId: Int, movieId: Int)
+    @Query("SELECT EXISTS(SELECT 1 FROM watchlist WHERE id = :movieId)")
+    suspend fun exists(movieId: Int): Boolean
 }
+

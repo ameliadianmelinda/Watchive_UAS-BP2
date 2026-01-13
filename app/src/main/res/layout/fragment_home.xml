@@ -2,6 +2,7 @@
 <ScrollView xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:app="http://schemas.android.com/apk/res-auto"
     xmlns:tools="http://schemas.android.com/tools"
+    android:id="@+id/scroll_home"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
     android:background="#121212"
@@ -19,7 +20,7 @@
             android:layout_width="match_parent"
             android:layout_height="50dp"
             android:background="@drawable/rounded_edittext"
-            android:hint="Cari Film"
+            android:hint="@string/search_hint"
             android:paddingStart="16dp"
             android:paddingEnd="16dp"
             android:textColor="@color/white"
@@ -34,121 +35,156 @@
         <TextView
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:text="Film Populer"
+            android:text="@string/popular_title"
             android:textColor="@color/white"
             android:textSize="18sp"
             android:textStyle="bold"
             android:layout_marginBottom="16dp"/>
 
-        <!-- Featured Movie Card -->
-        <com.google.android.material.card.MaterialCardView
-            android:id="@+id/featured_movie_card"
+        <!-- Featured Movie Card with Shimmer -->
+        <com.facebook.shimmer.ShimmerFrameLayout
+            android:id="@+id/shimmer_featured"
             android:layout_width="match_parent"
             android:layout_height="200dp"
-            app:cardCornerRadius="16dp"
-            app:cardBackgroundColor="#1E1E1E"
-            android:layout_marginBottom="24dp">
+            app:shimmer_auto_start="true"
+            app:shimmer_duration="1000">
 
-            <LinearLayout
+            <com.google.android.material.card.MaterialCardView
+                android:id="@+id/featured_movie_card"
                 android:layout_width="match_parent"
-                android:layout_height="match_parent"
-                android:orientation="horizontal">
-
-                <ImageView
-                    android:id="@+id/featured_movie_poster"
-                    android:layout_width="140dp"
-                    android:layout_height="match_parent"
-                    android:scaleType="centerCrop"
-                    tools:ignore="ContentDescription"
-                    tools:src="@tools:sample/backgrounds/scenic"/>
+                android:layout_height="200dp"
+                app:cardCornerRadius="16dp"
+                app:cardBackgroundColor="#1E1E1E"
+                android:layout_marginBottom="24dp">
 
                 <LinearLayout
                     android:layout_width="match_parent"
                     android:layout_height="match_parent"
-                    android:orientation="vertical"
-                    android:padding="16dp">
+                    android:orientation="horizontal">
 
-                    <TextView
-                        android:id="@+id/featured_movie_title"
-                        android:layout_width="wrap_content"
-                        android:layout_height="wrap_content"
-                        android:textColor="@color/white"
-                        android:textSize="16sp"
-                        android:textStyle="bold"
-                        tools:text="10 Things I Hate About You"/>
+                    <ImageView
+                        android:id="@+id/featured_movie_poster"
+                        android:layout_width="140dp"
+                        android:layout_height="match_parent"
+                        android:scaleType="centerCrop"
+                        tools:ignore="ContentDescription"
+                        tools:src="@tools:sample/backgrounds/scenic"/>
 
-                    <RatingBar
-                        android:id="@+id/featured_movie_rating"
-                        style="?android:attr/ratingBarStyleSmall"
-                        android:layout_width="wrap_content"
-                        android:layout_height="wrap_content"
-                        android:numStars="5"
-                        android:stepSize="0.5"
-                        android:progressTint="#FFD700"
-                        android:layout_marginTop="8dp"/>
-
-                    <TextView
-                        android:id="@+id/featured_movie_genre"
-                        android:layout_width="wrap_content"
-                        android:layout_height="wrap_content"
-                        android:text="Genre"
-                        android:textColor="@color/gray_light"
-                        android:textSize="12sp"
-                        android:layout_marginTop="8dp"/>
-
-                    <!-- Spacer -->
-                    <View
+                    <LinearLayout
                         android:layout_width="match_parent"
-                        android:layout_height="0dp"
-                        android:layout_weight="1" />
+                        android:layout_height="match_parent"
+                        android:orientation="vertical"
+                        android:padding="16dp">
 
-                    <TextView
-                        android:layout_width="wrap_content"
-                        android:layout_height="wrap_content"
-                        android:text="Ditonton 100+ orang"
-                        android:textColor="@color/white"
-                        android:textSize="14sp"
-                        android:textStyle="bold"/>
+                        <TextView
+                            android:id="@+id/featured_movie_title"
+                            android:layout_width="wrap_content"
+                            android:layout_height="wrap_content"
+                            android:textColor="@color/white"
+                            android:textSize="16sp"
+                            android:textStyle="bold"
+                            tools:text="10 Things I Hate About You"/>
+
+                        <RatingBar
+                            android:id="@+id/featured_movie_rating"
+                            style="?android:attr/ratingBarStyleSmall"
+                            android:layout_width="wrap_content"
+                            android:layout_height="wrap_content"
+                            android:numStars="5"
+                            android:stepSize="0.5"
+                            android:progressTint="#FFD700"
+                            android:layout_marginTop="8dp"/>
+
+                        <TextView
+                            android:id="@+id/featured_movie_genre"
+                            android:layout_width="wrap_content"
+                            android:layout_height="wrap_content"
+                            android:text="Genre"
+                            android:textColor="@color/gray_light"
+                            android:textSize="12sp"
+                            android:layout_marginTop="8dp"/>
+
+                        <TextView
+                            android:id="@+id/featured_movie_director"
+                            android:layout_width="wrap_content"
+                            android:layout_height="wrap_content"
+                            android:text=""
+                            android:textColor="@color/gray_light"
+                            android:textSize="12sp"
+                            android:layout_marginTop="4dp"/>
+
+                        <!-- Spacer -->
+                        <View
+                            android:layout_width="match_parent"
+                            android:layout_height="0dp"
+                            android:layout_weight="1" />
+
+                        <TextView
+                            android:layout_width="wrap_content"
+                            android:layout_height="wrap_content"
+                            android:text="Ditonton 100+ orang"
+                            android:textColor="@color/white"
+                            android:textSize="14sp"
+                            android:textStyle="bold"/>
+                    </LinearLayout>
                 </LinearLayout>
-            </LinearLayout>
-        </com.google.android.material.card.MaterialCardView>
+            </com.google.android.material.card.MaterialCardView>
+        </com.facebook.shimmer.ShimmerFrameLayout>
 
         <!-- Rekomendasi Title -->
         <TextView
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:text="Rekomendasi Untukmu"
+            android:text="@string/recommendations_title"
             android:textColor="@color/white"
             android:textSize="18sp"
             android:textStyle="bold"
             android:layout_marginBottom="16dp"/>
 
-        <androidx.recyclerview.widget.RecyclerView
-            android:id="@+id/rv_recommendations"
+        <com.facebook.shimmer.ShimmerFrameLayout
+            android:id="@+id/shimmer_recommendations"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:orientation="horizontal"
-            app:layoutManager="androidx.recyclerview.widget.LinearLayoutManager"
-            tools:listitem="@layout/item_movie_horizontal"
-            android:layout_marginBottom="24dp"/>
+            app:shimmer_auto_start="true"
+            app:shimmer_duration="1000"
+            android:layout_marginBottom="24dp">
+
+            <androidx.recyclerview.widget.RecyclerView
+                android:id="@+id/rv_recommendations"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:orientation="horizontal"
+                app:layoutManager="androidx.recyclerview.widget.LinearLayoutManager"
+                tools:listitem="@layout/item_movie_horizontal" />
+
+        </com.facebook.shimmer.ShimmerFrameLayout>
 
         <!-- Baru Rilis Title -->
         <TextView
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:text="Baru Rilis"
+            android:text="@string/new_releases_title"
             android:textColor="@color/white"
             android:textSize="18sp"
             android:textStyle="bold"
             android:layout_marginBottom="16dp"/>
 
-        <androidx.recyclerview.widget.RecyclerView
-            android:id="@+id/rv_new_releases"
+        <com.facebook.shimmer.ShimmerFrameLayout
+            android:id="@+id/shimmer_new_releases"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:orientation="horizontal"
-            app:layoutManager="androidx.recyclerview.widget.LinearLayoutManager"
-            tools:listitem="@layout/item_movie_horizontal"/>
+            app:shimmer_auto_start="true"
+            app:shimmer_duration="1000">
+
+            <androidx.recyclerview.widget.RecyclerView
+                android:id="@+id/rv_new_releases"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:orientation="horizontal"
+                app:layoutManager="androidx.recyclerview.widget.LinearLayoutManager"
+                tools:listitem="@layout/item_movie_horizontal"/>
+
+        </com.facebook.shimmer.ShimmerFrameLayout>
 
         <ProgressBar
             android:id="@+id/progress_bar"
