@@ -59,6 +59,10 @@ class HomeFragment : Fragment() {
     }
 
     private fun observeViewModel() {
+        viewModel.isLoading.observe(viewLifecycleOwner) { isLoading ->
+            binding.progressBar.visibility = if (isLoading) View.VISIBLE else View.GONE
+        }
+
         viewModel.popularMovies.observe(viewLifecycleOwner) { movies ->
             if (!movies.isNullOrEmpty()) {
                 setupFeaturedMovie(movies[0])
@@ -74,7 +78,11 @@ class HomeFragment : Fragment() {
         }
 
         viewModel.errorMessage.observe(viewLifecycleOwner) { error ->
-            error?.let { Toast.makeText(context, it, Toast.LENGTH_LONG).show() }
+            error?.let { 
+                if (it.isNotEmpty()) {
+                    Toast.makeText(context, it, Toast.LENGTH_LONG).show()
+                }
+            }
         }
     }
 
@@ -82,9 +90,27 @@ class HomeFragment : Fragment() {
         binding.featuredMovieTitle.text = movie.title
         binding.featuredMovieRating.rating = (movie.voteAverage / 2).toFloat()
         
+        val genreName = when (movie.genreIds?.firstOrNull()) {
+            28 -> "Action"
+            12 -> "Adventure"
+            16 -> "Animation"
+            35 -> "Comedy"
+            80 -> "Crime"
+            18 -> "Drama"
+            10751 -> "Family"
+            14 -> "Fantasy"
+            27 -> "Horror"
+            10749 -> "Romance"
+            878 -> "Sci-Fi"
+            53 -> "Thriller"
+            else -> "Genre"
+        }
+        binding.featuredMovieGenre.text = genreName
+        
         val imageUrl = "https://image.tmdb.org/t/p/w500${movie.posterPath}"
         binding.featuredMoviePoster.load(imageUrl) {
             crossfade(true)
+            placeholder(R.drawable.login_bg_gradient)
         }
         
         binding.featuredMovieCard.setOnClickListener {
@@ -94,7 +120,6 @@ class HomeFragment : Fragment() {
 
     private fun onMovieClicked(movie: Movie) {
         Toast.makeText(context, "Clicked: ${movie.title}", Toast.LENGTH_SHORT).show()
-        // Kita akan tambahkan navigasi ke detail film nanti
     }
 
     override fun onDestroyView() {
