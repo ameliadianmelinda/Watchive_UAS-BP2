@@ -42,26 +42,33 @@
                 app:tint="@color/white" />
         </RelativeLayout>
 
-        <!-- Search bar -->
+        <!-- Search bar with EditText -->
         <LinearLayout
-            android:id="@+id/search_bar"
+            android:id="@+id/search_container"
             android:layout_width="match_parent"
             android:layout_height="50dp"
             android:layout_marginTop="20dp"
             android:background="@drawable/rounded_search"
             android:backgroundTint="#2A2A2A"
             android:orientation="horizontal"
-            android:paddingStart="20dp"
+            android:paddingStart="16dp"
             android:paddingEnd="16dp"
             android:gravity="center_vertical">
 
-            <TextView
+            <EditText
+                android:id="@+id/et_search_watchlist"
                 android:layout_width="0dp"
-                android:layout_height="wrap_content"
+                android:layout_height="match_parent"
                 android:layout_weight="1"
-                android:text="@string/watchlist_search_hint"
-                android:textColor="#8E8E93"
-                android:textSize="15sp" />
+                android:background="@null"
+                android:hint="@string/watchlist_search_hint"
+                android:textColor="@color/white"
+                android:textColorHint="#8E8E93"
+                android:textSize="15sp"
+                android:maxLines="1"
+                android:inputType="text"
+                android:imeOptions="actionSearch"
+                android:importantForAutofill="no" />
 
             <ImageView
                 android:layout_width="20dp"
@@ -71,7 +78,7 @@
                 app:tint="#8E8E93" />
         </LinearLayout>
 
-        <!-- Dynamic Content Section -->
+        <!-- Dynamic Content Section (Folders Only) -->
         <LinearLayout
             android:id="@+id/layout_content"
             android:layout_width="match_parent"
@@ -79,7 +86,6 @@
             android:orientation="vertical"
             android:visibility="visible">
 
-            <!-- Folders Section -->
             <TextView
                 android:id="@+id/tv_folder_header"
                 android:layout_width="wrap_content"
@@ -97,28 +103,9 @@
                 android:layout_height="wrap_content"
                 android:nestedScrollingEnabled="false"
                 tools:listitem="@layout/item_folder" />
-
-            <!-- Movies Section -->
-            <TextView
-                android:id="@+id/tv_movie_header"
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:text="Semua Film"
-                android:textColor="@color/white"
-                android:textSize="18sp"
-                android:textStyle="bold"
-                android:layout_marginTop="24dp"
-                android:layout_marginBottom="12dp" />
-
-            <androidx.recyclerview.widget.RecyclerView
-                android:id="@+id/rv_watchlist"
-                android:layout_width="match_parent"
-                android:layout_height="wrap_content"
-                android:nestedScrollingEnabled="false"
-                tools:listitem="@layout/item_movie_horizontal" />
         </LinearLayout>
 
-        <!-- Empty state (matching image) -->
+        <!-- Empty state -->
         <LinearLayout
             android:id="@+id/empty_state"
             android:layout_width="match_parent"
@@ -149,7 +136,7 @@
             <TextView
                 android:layout_width="280dp"
                 android:layout_height="wrap_content"
-                android:text="@string/watchlist_empty_sub"
+                android:text="Buat folder baru untuk mulai mengumpulkan film favorit Anda."
                 android:textColor="#8E8E93"
                 android:textSize="14sp"
                 android:gravity="center"
