@@ -5,26 +5,31 @@ import androidx.room.Database
 import androidx.room.Room
 import androidx.room.RoomDatabase
 
-@Database(entities = [User::class, Watchlist::class], version = 3, exportSchema = false)
+@Database(entities = [WatchlistMovie::class, User::class, WatchlistFolder::class, FolderMovieJoin::class], version = 3)
 abstract class AppDatabase : RoomDatabase() {
-
-    abstract fun userDao(): UserDao
     abstract fun watchlistDao(): WatchlistDao
+    abstract fun userDao(): UserDao
+    abstract fun folderDao(): WatchlistFolderDao
 
     companion object {
         @Volatile
         private var INSTANCE: AppDatabase? = null
 
-        fun getDatabase(context: Context): AppDatabase {
+        fun getInstance(context: Context): AppDatabase {
             return INSTANCE ?: synchronized(this) {
                 val instance = Room.databaseBuilder(
                     context.applicationContext,
                     AppDatabase::class.java,
-                    "watchive_database"
-                ).fallbackToDestructiveMigration().build()
+                    "watchive_db"
+                )
+                .fallbackToDestructiveMigration()
+                .build()
                 INSTANCE = instance
                 instance
             }
         }
+
+        @JvmStatic
+        fun getDatabase(context: Context): AppDatabase = getInstance(context)
     }
 }

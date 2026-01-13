@@ -2,13 +2,13 @@ plugins {
     alias(libs.plugins.android.application)
     alias(libs.plugins.kotlin.android)
     alias(libs.plugins.google.ksp)
+    id("kotlin-parcelize")
+    id("androidx.navigation.safeargs.kotlin") version "2.9.6"
 }
 
 android {
     namespace = "com.example.watchive"
-    compileSdk {
-        version = release(36)
-    }
+    compileSdk = 36
 
     defaultConfig {
         applicationId = "com.example.watchive"
@@ -48,6 +48,8 @@ dependencies {
     implementation(libs.androidx.activity)
     implementation(libs.androidx.constraintlayout)
 
+    // Navigation dependencies are added below explicitly
+
     // Room
     val room_version = "2.6.1"
     implementation("androidx.room:room-runtime:$room_version")
@@ -61,10 +63,18 @@ dependencies {
     // Coil for image loading
     implementation("io.coil-kt:coil:2.5.0")
 
+    // Facebook Shimmer for loading placeholders
+    implementation("com.facebook.shimmer:shimmer:0.5.0")
+
     // ViewModel, LiveData, and Fragment KTX
     implementation("androidx.lifecycle:lifecycle-viewmodel-ktx:2.7.0")
     implementation("androidx.lifecycle:lifecycle-livedata-ktx:2.7.0")
+    implementation("androidx.lifecycle:lifecycle-runtime-ktx:2.7.0")
     implementation("androidx.fragment:fragment-ktx:1.7.0")
+
+    // Navigation Component
+    implementation("androidx.navigation:navigation-fragment-ktx:2.9.6")
+    implementation("androidx.navigation:navigation-ui-ktx:2.9.6")
 
     testImplementation(libs.junit)
     androidTestImplementation(libs.androidx.junit)

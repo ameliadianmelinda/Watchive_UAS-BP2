@@ -2,7 +2,8 @@ package com.example.watchive
 
 import androidx.appcompat.app.AppCompatActivity
 import android.os.Bundle
-import androidx.fragment.app.Fragment
+import androidx.navigation.fragment.NavHostFragment
+import androidx.navigation.ui.setupWithNavController
 import com.google.android.material.bottomnavigation.BottomNavigationView
 
 class MainActivity : AppCompatActivity() {
@@ -11,34 +12,15 @@ class MainActivity : AppCompatActivity() {
         super.onCreate(savedInstanceState)
         setContentView(R.layout.activity_main)
 
-        val bottomNavigation: BottomNavigationView = findViewById(R.id.bottomnav)
+        // 1. Ambil NavHostFragment dari layout
+        val navHostFragment = supportFragmentManager
+            .findFragmentById(R.id.nav_host_fragment) as NavHostFragment
         
-        bottomNavigation.setOnItemSelectedListener { item ->
-            when (item.itemId) {
-                R.id.navigation_home -> {
-                    openFragment(HomeFragment())
-                    true
-                }
-                R.id.navigation_watchlist -> {
-                    openFragment(WatchlistFragment())
-                    true
-                }
-                R.id.navigation_profile -> {
-                    openFragment(ProfileFragment())
-                    true
-                }
-                else -> false
-            }
-        }
-
-        if (savedInstanceState == null) {
-            bottomNavigation.selectedItemId = R.id.navigation_home
-        }
-    }
-
-    private fun openFragment(fragment: Fragment) {
-        supportFragmentManager.beginTransaction()
-            .replace(R.id.fragment_container, fragment)
-            .commit()
+        // 2. Ambil NavController
+        val navController = navHostFragment.navController
+        
+        // 3. Hubungkan BottomNavigationView dengan NavController
+        val bottomNavigation: BottomNavigationView = findViewById(R.id.bottomnav)
+        bottomNavigation.setupWithNavController(navController)
     }
 }
