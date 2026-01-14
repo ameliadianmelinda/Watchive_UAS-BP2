@@ -57,7 +57,6 @@ class FolderDetailFragment : Fragment() {
     }
 
     private fun setupRecyclerView() {
-        // Menggunakan GridLayoutManager dengan 2 kolom
         adapter = MovieAdapter(
             useGridLayout = true,
             onLongClick = { movie ->
@@ -74,13 +73,13 @@ class FolderDetailFragment : Fragment() {
 
     private fun showRemoveMovieFromFolderDialog(movie: Movie) {
         AlertDialog.Builder(requireContext())
-            .setTitle("Hapus dari Folder")
-            .setMessage("Hapus '${movie.title}' dari folder ini?")
-            .setPositiveButton("Hapus") { _, _ ->
+            .setTitle(getString(R.string.folder_remove_movie_title))
+            .setMessage(getString(R.string.folder_remove_movie_message, movie.title))
+            .setPositiveButton(getString(R.string.delete)) { _, _ ->
                 viewModel.removeMovieFromFolder(folderId, movie.id)
-                Toast.makeText(context, "${movie.title} dihapus dari folder", Toast.LENGTH_SHORT).show()
+                Toast.makeText(context, getString(R.string.folder_remove_movie_success, movie.title), Toast.LENGTH_SHORT).show()
             }
-            .setNegativeButton("Batal", null)
+            .setNegativeButton(getString(R.string.cancel), null)
             .show()
     }
 
@@ -88,12 +87,19 @@ class FolderDetailFragment : Fragment() {
         viewModel.folder.observe(viewLifecycleOwner) { folder ->
             folder?.let {
                 binding.tvFolderTitle.text = it.title
-                binding.tvFolderDesc.text = it.description ?: "Tidak ada deskripsi"
+                binding.tvFolderDesc.text = it.description ?: getString(R.string.no_description)
             }
         }
 
         viewModel.getMoviesInFolder(folderId).observe(viewLifecycleOwner) { movies ->
-            adapter.submitList(movies.map { it.toMovie() })
+            if (movies.isNullOrEmpty()) {
+                binding.rvFolderMovies.visibility = View.GONE
+                binding.tvEmptyFolder.visibility = View.VISIBLE
+            } else {
+                binding.rvFolderMovies.visibility = View.VISIBLE
+                binding.tvEmptyFolder.visibility = View.GONE
+                adapter.submitList(movies.map { it.toMovie() })
+            }
         }
     }
 
@@ -108,12 +114,12 @@ class FolderDetailFragment : Fragment() {
 
         binding.btnAddMovieToFolder.setOnClickListener {
             val bundle = Bundle().apply { putInt("folderId", folderId) }
-            findNavController().navigate(R.id.selectMoviesFragment, bundle)
+            findNavController().navigate(resId = R.id.selectMoviesFragment, args = bundle)
         }
     }
 
     private fun showMenuDialog() {
-        val options = arrayOf("Edit Nama Folder", "Hapus Folder")
+        val options = arrayOf(getString(R.string.menu_edit_folder), getString(R.string.menu_delete_folder))
         AlertDialog.Builder(requireContext())
             .setItems(options) { _, which ->
                 when (which) {
@@ -134,28 +140,28 @@ class FolderDetailFragment : Fragment() {
         etDesc.setText(currentFolder.description)
 
         AlertDialog.Builder(requireContext())
-            .setTitle("Edit Folder")
+            .setTitle(getString(R.string.dialog_edit_folder_title))
             .setView(view)
-            .setPositiveButton("Simpan") { _, _ ->
+            .setPositiveButton(getString(R.string.save)) { _, _ ->
                 val newTitle = etTitle.text.toString()
                 val newDesc = etDesc.text.toString()
                 viewModel.updateFolder(folderId, newTitle, newDesc)
             }
-            .setNegativeButton("Batal", null)
+            .setNegativeButton(getString(R.string.cancel), null)
             .show()
     }
 
     private fun showDeleteConfirmDialog() {
         AlertDialog.Builder(requireContext())
-            .setTitle("Hapus Folder")
-            .setMessage("Apakah Anda yakin ingin menghapus folder ini?")
-            .setPositiveButton("Hapus") { _, _ ->
+            .setTitle(getString(R.string.dialog_delete_folder_title))
+            .setMessage(getString(R.string.dialog_delete_folder_message))
+            .setPositiveButton(getString(R.string.delete)) { _, _ ->
                 viewModel.folder.value?.let {
                     viewModel.deleteFolder(it)
                     findNavController().navigateUp()
                 }
             }
-            .setNegativeButton("Batal", null)
+            .setNegativeButton(getString(R.string.cancel), null)
             .show()
     }
 

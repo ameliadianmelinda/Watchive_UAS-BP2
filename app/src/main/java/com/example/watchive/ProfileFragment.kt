@@ -6,6 +6,7 @@ import android.os.Bundle
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
+import androidx.appcompat.app.AlertDialog
 import androidx.fragment.app.Fragment
 import androidx.lifecycle.lifecycleScope
 import com.example.watchive.data.local.AppDatabase
@@ -51,13 +52,28 @@ class ProfileFragment : Fragment() {
 
     private fun setupLogout() {
         binding.btnLogout.setOnClickListener {
-            val sharedPref = requireContext().getSharedPreferences("user_prefs", Context.MODE_PRIVATE)
-            sharedPref.edit().clear().apply()
-
-            val intent = Intent(requireContext(), LoginActivity::class.java)
-            intent.flags = Intent.FLAG_ACTIVITY_NEW_TASK or Intent.FLAG_ACTIVITY_CLEAR_TASK
-            startActivity(intent)
+            showLogoutConfirmation()
         }
+    }
+
+    private fun showLogoutConfirmation() {
+        AlertDialog.Builder(requireContext())
+            .setTitle("Logout")
+            .setMessage("Apakah Anda yakin ingin keluar dari akun?")
+            .setPositiveButton("Ya, Keluar") { _, _ ->
+                performLogout()
+            }
+            .setNegativeButton("Batal", null)
+            .show()
+    }
+
+    private fun performLogout() {
+        val sharedPref = requireContext().getSharedPreferences("user_prefs", Context.MODE_PRIVATE)
+        sharedPref.edit().clear().apply()
+
+        val intent = Intent(requireContext(), LoginActivity::class.java)
+        intent.flags = Intent.FLAG_ACTIVITY_NEW_TASK or Intent.FLAG_ACTIVITY_CLEAR_TASK
+        startActivity(intent)
     }
 
     override fun onDestroyView() {

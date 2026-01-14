@@ -136,11 +136,9 @@ class HomeFragment : Fragment() {
             if (isLoading) {
                 showShimmer(true)
             } else {
-                viewLifecycleOwner.lifecycleScope.launch {
-                    delay(3000)
-                    if (_binding != null) {
-                        showShimmer(false)
-                    }
+                // Dihapus delay 3 detik agar data muncul lebih responsif
+                if (_binding != null) {
+                    showShimmer(false)
                 }
             }
         }
