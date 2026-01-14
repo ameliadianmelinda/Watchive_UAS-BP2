@@ -11,7 +11,7 @@ import androidx.fragment.app.Fragment
 import androidx.fragment.app.viewModels
 import androidx.lifecycle.lifecycleScope
 import androidx.navigation.fragment.findNavController
-import androidx.recyclerview.widget.LinearLayoutManager
+import androidx.recyclerview.widget.GridLayoutManager
 import com.example.watchive.R
 import com.example.watchive.data.local.AppDatabase
 import com.example.watchive.data.local.FolderMovieJoin
@@ -57,7 +57,9 @@ class FolderDetailFragment : Fragment() {
     }
 
     private fun setupRecyclerView() {
+        // Menggunakan GridLayoutManager dengan 2 kolom
         adapter = MovieAdapter(
+            useGridLayout = true,
             onLongClick = { movie ->
                 showRemoveMovieFromFolderDialog(movie)
             },
@@ -66,7 +68,7 @@ class FolderDetailFragment : Fragment() {
                 findNavController().navigate(resId = R.id.movieDetailFragment, args = bundle)
             }
         )
-        binding.rvFolderMovies.layoutManager = LinearLayoutManager(context)
+        binding.rvFolderMovies.layoutManager = GridLayoutManager(context, 2)
         binding.rvFolderMovies.adapter = adapter
     }
 
@@ -90,7 +92,6 @@ class FolderDetailFragment : Fragment() {
             }
         }
 
-        // PERBAIKAN: Menambahkan viewModel.userId sebagai parameter kedua
         viewModel.getMoviesInFolder(folderId).observe(viewLifecycleOwner) { movies ->
             adapter.submitList(movies.map { it.toMovie() })
         }
@@ -106,7 +107,6 @@ class FolderDetailFragment : Fragment() {
         }
 
         binding.btnAddMovieToFolder.setOnClickListener {
-            // Langsung navigasi ke halaman multi-select film
             val bundle = Bundle().apply { putInt("folderId", folderId) }
             findNavController().navigate(R.id.selectMoviesFragment, bundle)
         }
