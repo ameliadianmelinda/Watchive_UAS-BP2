@@ -10,14 +10,15 @@
         android:supportsRtl="true"
         android:theme="@style/Theme.Watchive">
 
-        <activity android:name=".MainActivity" />
-        <activity android:name=".LoginActivity" />
-        <activity android:name=".RegisterActivity" />
-        <activity android:name=".ui.watchlist.CreateFolderActivity" />
+        <activity android:name="com.example.watchive.MainActivity" />
+        <activity android:name="com.example.watchive.LoginActivity" />
+        <activity android:name="com.example.watchive.RegisterActivity" />
+        <activity android:name="com.example.watchive.ui.watchlist.CreateFolderActivity" />
 
         <activity
-            android:name=".SplashActivity"
-            android:exported="true">
+            android:name="com.example.watchive.SplashActivity"
+            android:exported="true"
+            android:theme="@style/Theme.Watchive.Splash">
             <intent-filter>
                 <action android:name="android.intent.action.MAIN" />
                 <category android:name="android.intent.category.LAUNCHER" />
