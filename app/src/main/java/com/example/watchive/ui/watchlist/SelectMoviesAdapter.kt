@@ -4,12 +4,12 @@ import android.view.LayoutInflater
 import android.view.ViewGroup
 import androidx.recyclerview.widget.RecyclerView
 import coil.load
-import com.example.watchive.data.local.WatchlistMovie
+import com.example.watchive.data.remote.model.Movie
 import com.example.watchive.databinding.ItemMovieSelectableBinding
 
 class SelectMoviesAdapter(
-    private val movies: List<WatchlistMovie>,
-    private val onSelectionChanged: (WatchlistMovie, Boolean) -> Unit
+    private val movies: List<Movie>,
+    private val onSelectionChanged: (Movie, Boolean) -> Unit
 ) : RecyclerView.Adapter<SelectMoviesAdapter.ViewHolder>() {
 
     private val selectedMovieIds = mutableSetOf<Int>()

@@ -30,11 +30,12 @@ class LoginActivity : AppCompatActivity() {
         }
 
         btnLogin.setOnClickListener {
-            val email = editEmail.text.toString()
-            val password = editPassword.text.toString()
+            val email = editEmail.text.toString().trim()
+            val password = editPassword.text.toString().trim()
 
             if (email.isNotEmpty() && password.isNotEmpty()) {
                 lifecycleScope.launch {
+<<<<<<< HEAD
                     val user = db.userDao().getUserByEmail(email)
                     if (user != null && user.password == password) {
                         // Simpan email ke SharedPreferences sebagai session
@@ -50,6 +51,35 @@ class LoginActivity : AppCompatActivity() {
                     } else {
                         runOnUiThread {
                             Toast.makeText(this@LoginActivity, "Login gagal, periksa kembali email dan password", Toast.LENGTH_SHORT).show()
+=======
+                    try {
+                        val user = db.userDao().getUserByEmail(email)
+                        if (user != null && user.password == password) {
+                            // SIMPAN DATA USER DENGAN PASTI
+                            val sharedPref = getSharedPreferences("user_prefs", Context.MODE_PRIVATE)
+                            sharedPref.edit().apply {
+                                putInt("user_id", user.userId)
+                                putString("user_name", user.name)
+                                commit() // Paksa simpan saat itu juga
+                            }
+
+                            runOnUiThread {
+                                Toast.makeText(this@LoginActivity, "Login berhasil", Toast.LENGTH_SHORT).show()
+                                val intent = Intent(this@LoginActivity, MainActivity::class.java)
+                                // FLAG_ACTIVITY_NEW_TASK dan CLEAR_TASK menghapus riwayat login agar tidak crash saat back
+                                intent.flags = Intent.FLAG_ACTIVITY_NEW_TASK or Intent.FLAG_ACTIVITY_CLEAR_TASK
+                                startActivity(intent)
+                                finish()
+                            }
+                        } else {
+                            runOnUiThread {
+                                Toast.makeText(this@LoginActivity, "Email atau password salah", Toast.LENGTH_SHORT).show()
+                            }
+                        }
+                    } catch (e: Exception) {
+                        runOnUiThread {
+                            Toast.makeText(this@LoginActivity, "Error Database: ${e.message}", Toast.LENGTH_LONG).show()
+>>>>>>> f64f4956950dbb7c1aa94ea6d268a10e174579de
                         }
                     }
                 }

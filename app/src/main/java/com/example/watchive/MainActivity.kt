@@ -12,7 +12,11 @@ class MainActivity : AppCompatActivity() {
         super.onCreate(savedInstanceState)
         setContentView(R.layout.activity_main)
 
+<<<<<<< HEAD
         // 1. Ambil NavHostFragment dari layout
+=======
+        // Cara inisialisasi NavController yang paling standar dan stabil
+>>>>>>> f64f4956950dbb7c1aa94ea6d268a10e174579de
         val navHostFragment = supportFragmentManager
             .findFragmentById(R.id.nav_host_fragment) as NavHostFragment
         

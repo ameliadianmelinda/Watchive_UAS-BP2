@@ -27,10 +27,26 @@
     <string name="watchlist_explore">Jelajahi Film</string>
     <string name="add">Add</string>
     <string name="search">Search</string>
+
     <!-- Home strings -->
     <string name="search_hint">Cari Film</string>
     <string name="popular_title">Film Populer</string>
     <string name="recommendations_title">Rekomendasi Untukmu</string>
     <string name="new_releases_title">Baru Rilis</string>
     <string name="year_format">(%1$s)</string>
+
+    <!-- Folder Detail -->
+    <string name="folder_remove_movie_title">Hapus dari Folder</string>
+    <string name="folder_remove_movie_message">Hapus \'%1$s\' dari folder ini?</string>
+    <string name="folder_remove_movie_success">%1$s dihapus dari folder</string>
+    <string name="delete">Hapus</string>
+    <string name="cancel">Batal</string>
+    <string name="save">Simpan</string>
+    <string name="no_description">Tidak ada deskripsi</string>
+    <string name="menu_edit_folder">Edit Nama Folder</string>
+    <string name="menu_delete_folder">Hapus Folder</string>
+    <string name="dialog_edit_folder_title">Edit Folder</string>
+    <string name="dialog_delete_folder_title">Hapus Folder</string>
+    <string name="dialog_delete_folder_message">Apakah Anda yakin ingin menghapus folder ini?</string>
+    <string name="empty_folder">Watchlist kamu kosong</string>
 </resources>

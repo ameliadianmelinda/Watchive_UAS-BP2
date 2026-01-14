@@ -8,6 +8,7 @@ import com.example.watchive.data.remote.model.Movie
 data class WatchlistMovie(
     @PrimaryKey
     val id: Int,
+    val userId: Int, // Menghubungkan ke User
     val title: String,
     val overview: String?,
     val posterPath: String?,
@@ -29,9 +30,10 @@ data class WatchlistMovie(
     }
 
     companion object {
-        fun fromMovie(movie: Movie): WatchlistMovie {
+        fun fromMovie(movie: Movie, userId: Int): WatchlistMovie {
             return WatchlistMovie(
                 id = movie.id,
+                userId = userId,
                 title = movie.title,
                 overview = movie.overview,
                 posterPath = movie.posterPath,
@@ -41,4 +43,3 @@ data class WatchlistMovie(
         }
     }
 }
-

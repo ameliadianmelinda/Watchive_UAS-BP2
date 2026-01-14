@@ -6,7 +6,9 @@
 
     <application
         android:allowBackup="true"
+        android:icon="@drawable/logo_watchive"
         android:label="@string/app_name"
+        android:roundIcon="@drawable/logo_watchive"
         android:supportsRtl="true"
         android:theme="@style/Theme.Watchive">
 

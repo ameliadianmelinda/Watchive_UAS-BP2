@@ -8,22 +8,22 @@ import kotlinx.coroutines.withContext
 
 class WatchlistRepository(private val dao: WatchlistDao, private val folderDao: WatchlistFolderDao) {
 
-    fun getAll(): LiveData<List<WatchlistMovie>> = dao.getAll()
+    fun getAll(userId: Int): LiveData<List<WatchlistMovie>> = dao.getAll(userId)
 
-    suspend fun add(movie: Movie) = withContext(Dispatchers.IO) {
-        dao.insert(WatchlistMovie.fromMovie(movie))
+    suspend fun add(movie: Movie, userId: Int) = withContext(Dispatchers.IO) {
+        dao.insert(WatchlistMovie.fromMovie(movie, userId))
     }
 
-    suspend fun remove(movieId: Int) = withContext(Dispatchers.IO) {
-        dao.deleteById(movieId)
+    suspend fun remove(movieId: Int, userId: Int) = withContext(Dispatchers.IO) {
+        dao.deleteById(movieId, userId)
     }
 
-    suspend fun exists(movieId: Int): Boolean = withContext(Dispatchers.IO) {
-        dao.exists(movieId)
+    suspend fun exists(movieId: Int, userId: Int): Boolean = withContext(Dispatchers.IO) {
+        dao.exists(movieId, userId)
     }
 
     // Folders
-    fun getFolders(): LiveData<List<WatchlistFolder>> = folderDao.getAllFolders()
+    fun getFolders(userId: Int): LiveData<List<WatchlistFolder>> = folderDao.getAllFolders(userId)
 
     companion object {
         fun create(context: Context): WatchlistRepository {

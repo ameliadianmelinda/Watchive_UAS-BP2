@@ -1,5 +1,6 @@
 package com.example.watchive.ui.watchlist
 
+import android.content.Context
 import android.os.Bundle
 import android.view.LayoutInflater
 import android.view.ViewGroup
@@ -37,7 +38,11 @@ class FolderAdapter : ListAdapter<WatchlistFolder, FolderAdapter.FolderViewHolde
     class FolderViewHolder(private val binding: ItemFolderBinding) : RecyclerView.ViewHolder(binding.root) {
         fun bind(folder: WatchlistFolder) {
             binding.tvFolderTitle.text = folder.title
-            binding.tvFolderDesc.text = folder.description ?: "Tidak ada deskripsi"
+            
+            // Perbaikan: Gunakan nilai default yang aman jika SharedPreferences kosong
+            val sharedPref = itemView.context.getSharedPreferences("user_prefs", Context.MODE_PRIVATE)
+            val userName = sharedPref.getString("user_name", "User") ?: "User"
+            binding.tvFolderUserInfo.text = "watchlist • $userName"
         }
     }
 }

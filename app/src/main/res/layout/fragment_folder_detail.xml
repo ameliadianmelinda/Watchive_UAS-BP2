@@ -6,7 +6,10 @@
     android:layout_height="match_parent"
     android:background="#121212"
     android:orientation="vertical"
-    android:padding="20dp">
+    android:paddingStart="20dp"
+    android:paddingEnd="20dp"
+    android:paddingTop="48dp"
+    android:paddingBottom="20dp">
 
     <RelativeLayout
         android:layout_width="match_parent"
@@ -18,6 +21,7 @@
             android:layout_height="40dp"
             android:background="@drawable/back_button_background"
             android:src="@drawable/ic_back"
+            android:scaleType="center"
             app:tint="@color/white" />
 
         <ImageButton
@@ -69,6 +73,7 @@
             android:layout_centerVertical="true"
             android:background="@drawable/back_button_background"
             android:src="@android:drawable/ic_input_add"
+            android:scaleType="center"
             android:contentDescription="Add movie to folder"
             app:tint="@color/white" />
 
@@ -80,12 +85,27 @@
         android:layout_marginTop="20dp"
         android:background="#333333" />
 
-    <androidx.recyclerview.widget.RecyclerView
-        android:id="@+id/rv_folder_movies"
+    <FrameLayout
         android:layout_width="match_parent"
         android:layout_height="0dp"
-        android:layout_weight="1"
-        android:layout_marginTop="16dp"
-        tools:listitem="@layout/item_movie_horizontal" />
+        android:layout_weight="1">
+
+        <androidx.recyclerview.widget.RecyclerView
+            android:id="@+id/rv_folder_movies"
+            android:layout_width="match_parent"
+            android:layout_height="match_parent"
+            android:layout_marginTop="16dp"
+            tools:listitem="@layout/item_movie_grid" />
+
+        <TextView
+            android:id="@+id/tv_empty_folder"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_gravity="center"
+            android:text="Watchlist kamu kosong"
+            android:textColor="#B9B2BD"
+            android:textSize="16sp"
+            android:visibility="gone" />
+    </FrameLayout>
 
 </LinearLayout>

@@ -1,6 +1,7 @@
 package com.example.watchive.ui.watchlist
 
 import android.app.Application
+import android.content.Context
 import androidx.lifecycle.AndroidViewModel
 import androidx.lifecycle.LiveData
 import androidx.lifecycle.MutableLiveData
@@ -13,22 +14,24 @@ import kotlinx.coroutines.launch
 
 class FolderDetailViewModel(application: Application) : AndroidViewModel(application) {
     private val folderDao = AppDatabase.getInstance(application).folderDao()
+    private val sharedPref = application.getSharedPreferences("user_prefs", Context.MODE_PRIVATE)
+    val userId = sharedPref.getInt("user_id", -1)
 
     private val _folder = MutableLiveData<WatchlistFolder?>()
     val folder: LiveData<WatchlistFolder?> = _folder
 
     fun loadFolder(folderId: Int) {
         viewModelScope.launch {
-            _folder.value = folderDao.getFolderById(folderId)
+            _folder.value = folderDao.getFolderById(folderId, userId)
         }
     }
 
     fun getMoviesInFolder(folderId: Int): LiveData<List<WatchlistMovie>> {
-        return folderDao.getMoviesInFolder(folderId)
+        return folderDao.getMoviesInFolder(folderId, userId)
     }
 
     fun updateFolder(id: Int, title: String, description: String) = viewModelScope.launch {
-        folderDao.updateFolder(WatchlistFolder(id, title, description))
+        folderDao.updateFolder(WatchlistFolder(id, userId, title, description))
         loadFolder(id)
     }
 

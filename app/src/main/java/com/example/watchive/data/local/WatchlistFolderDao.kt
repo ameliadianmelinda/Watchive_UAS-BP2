@@ -10,14 +10,14 @@ import androidx.room.Update
 
 @Dao
 interface WatchlistFolderDao {
-    @Query("SELECT * FROM watchlist_folders")
-    fun getAllFolders(): LiveData<List<WatchlistFolder>>
+    @Query("SELECT * FROM watchlist_folders WHERE userId = :userId")
+    fun getAllFolders(userId: Int): LiveData<List<WatchlistFolder>>
 
-    @Query("SELECT * FROM watchlist_folders")
-    suspend fun getAllFoldersStatic(): List<WatchlistFolder>
+    @Query("SELECT * FROM watchlist_folders WHERE userId = :userId")
+    suspend fun getAllFoldersStatic(userId: Int): List<WatchlistFolder>
 
-    @Query("SELECT * FROM watchlist_folders WHERE id = :folderId")
-    suspend fun getFolderById(folderId: Int): WatchlistFolder?
+    @Query("SELECT * FROM watchlist_folders WHERE id = :folderId AND userId = :userId")
+    suspend fun getFolderById(folderId: Int, userId: Int): WatchlistFolder?
 
     @Insert(onConflict = OnConflictStrategy.REPLACE)
     suspend fun insertFolder(folder: WatchlistFolder)
@@ -32,20 +32,24 @@ interface WatchlistFolderDao {
     @Insert(onConflict = OnConflictStrategy.IGNORE)
     suspend fun addMovieToFolder(join: FolderMovieJoin)
 
+    // Optimasi: Insert banyak hubungan film-folder sekaligus
+    @Insert(onConflict = OnConflictStrategy.IGNORE)
+    suspend fun addMoviesToFolder(joins: List<FolderMovieJoin>)
+
     @Query("DELETE FROM folder_movie_join WHERE folderId = :folderId AND movieId = :movieId")
     suspend fun removeMovieFromFolder(folderId: Int, movieId: Int)
 
     @Query("""
         SELECT watchlist.* FROM watchlist 
         INNER JOIN folder_movie_join ON watchlist.id = folder_movie_join.movieId 
-        WHERE folder_movie_join.folderId = :folderId
+        WHERE folder_movie_join.folderId = :folderId AND watchlist.userId = :userId
     """)
-    fun getMoviesInFolder(folderId: Int): LiveData<List<WatchlistMovie>>
+    fun getMoviesInFolder(folderId: Int, userId: Int): LiveData<List<WatchlistMovie>>
 
     @Query("""
         SELECT watchlist.* FROM watchlist 
         INNER JOIN folder_movie_join ON watchlist.id = folder_movie_join.movieId 
-        WHERE folder_movie_join.folderId = :folderId
+        WHERE folder_movie_join.folderId = :folderId AND watchlist.userId = :userId
     """)
-    suspend fun getMoviesInFolderStatic(folderId: Int): List<WatchlistMovie>
+    suspend fun getMoviesInFolderStatic(folderId: Int, userId: Int): List<WatchlistMovie>
 }

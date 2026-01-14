@@ -19,24 +19,24 @@ class SplashActivity : AppCompatActivity() {
         val logo = findViewById<ImageView>(R.id.logoWatchive)
         val text = findViewById<TextView>(R.id.textWatchive)
 
-        // Fade-in
+        // Animasi Fade-in (Logo & Teks muncul perlahan)
         val fadeIn = AlphaAnimation(0f, 1f).apply {
-            duration = 2000
+            duration = 1500
         }
 
-        // Slide-up
-        val slideUp = TranslateAnimation(0f, 0f, 80f, 0f).apply {
-            duration = 2000
+        // Animasi Slide-up (Teks bergeser sedikit ke atas)
+        val slideUp = TranslateAnimation(0f, 0f, 50f, 0f).apply {
+            duration = 1500
         }
 
-        logo.startAnimation(fadeIn)
-        text.startAnimation(slideUp)
+        logo?.startAnimation(fadeIn)
+        text?.startAnimation(slideUp)
 
-        // Delay → move to Login
+        // Tunggu 3 detik lalu pindah ke Login
         Handler(Looper.getMainLooper()).postDelayed({
             val intent = Intent(this, LoginActivity::class.java)
             startActivity(intent)
             finish()
-        }, 4000)
+        }, 3000)
     }
 }

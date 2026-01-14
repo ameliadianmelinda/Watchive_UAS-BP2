@@ -7,6 +7,7 @@ import androidx.room.PrimaryKey
 data class WatchlistFolder(
     @PrimaryKey(autoGenerate = true)
     val id: Int = 0,
+    val userId: Int, // Menghubungkan ke User
     val title: String,
     val description: String?
 )
