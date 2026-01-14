@@ -59,6 +59,16 @@
                 tools:text="watchlist • Nama User" />
         </LinearLayout>
 
+        <!-- Icon titik 3 (Garis 3 / Menu) berwarna putih -->
+        <ImageView
+            android:id="@+id/btn_folder_menu"
+            android:layout_width="32dp"
+            android:layout_height="32dp"
+            android:padding="4dp"
+            android:src="@android:drawable/ic_menu_more"
+            android:contentDescription="Menu"
+            app:tint="@color/white" />
+
     </LinearLayout>
 
 </com.google.android.material.card.MaterialCardView>
