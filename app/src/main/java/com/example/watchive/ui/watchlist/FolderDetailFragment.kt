@@ -90,6 +90,7 @@ class FolderDetailFragment : Fragment() {
             }
         }
 
+        // PERBAIKAN: Menambahkan viewModel.userId sebagai parameter kedua
         viewModel.getMoviesInFolder(folderId).observe(viewLifecycleOwner) { movies ->
             adapter.submitList(movies.map { it.toMovie() })
         }
@@ -105,33 +106,9 @@ class FolderDetailFragment : Fragment() {
         }
 
         binding.btnAddMovieToFolder.setOnClickListener {
-            showAddMovieToFolderDialog()
-        }
-    }
-
-    private fun showAddMovieToFolderDialog() {
-        val db = AppDatabase.getInstance(requireContext())
-        lifecycleScope.launch {
-            val allWatchlistMovies = withContext(Dispatchers.IO) { db.watchlistDao().getAllStatic() }
-            val moviesInFolder = viewModel.getMoviesInFolder(folderId).value ?: emptyList()
-            val moviesInFolderIds = moviesInFolder.map { it.id }.toSet()
-            
-            val availableMovies = allWatchlistMovies.filter { it.id !in moviesInFolderIds }
-
-            if (availableMovies.isEmpty()) {
-                Toast.makeText(context, "Semua film di watchlist sudah ada di folder ini", Toast.LENGTH_SHORT).show()
-                return@launch
-            }
-
-            val movieTitles = availableMovies.map { it.title }.toTypedArray()
-            AlertDialog.Builder(requireContext())
-                .setTitle("Tambah Film ke Folder")
-                .setItems(movieTitles) { _, which ->
-                    val selectedMovie = availableMovies[which]
-                    viewModel.addMovieToFolder(folderId, selectedMovie.id)
-                    Toast.makeText(context, "${selectedMovie.title} ditambahkan", Toast.LENGTH_SHORT).show()
-                }
-                .show()
+            // Langsung navigasi ke halaman multi-select film
+            val bundle = Bundle().apply { putInt("folderId", folderId) }
+            findNavController().navigate(R.id.selectMoviesFragment, bundle)
         }
     }
 

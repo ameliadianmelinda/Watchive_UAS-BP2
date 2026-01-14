@@ -27,8 +27,8 @@ class HomeFragment : Fragment() {
 
     private val viewModel: HomeViewModel by viewModels()
     
-    private lateinit var recommendationsAdapter: MovieAdapter
-    private lateinit var newReleasesAdapter: MovieAdapter
+    private var recommendationsAdapter: MovieAdapter? = null
+    private var newReleasesAdapter: MovieAdapter? = null
 
     override fun onCreateView(
         inflater: LayoutInflater,
@@ -47,10 +47,11 @@ class HomeFragment : Fragment() {
         handleArgumentsForScroll()
         
         // Setup search bar click
-        binding.searchBar.setFocusable(false) // Disable keyboard on Home
+        binding.searchBar.isFocusable = false
         binding.searchBar.setOnClickListener {
-            // Navigate directly to searchFragment ID to avoid unresolved action reference
-            findNavController().navigate(resId = R.id.searchFragment)
+            if (isAdded) {
+                findNavController().navigate(resId = R.id.searchFragment)
+            }
         }
     }
 
@@ -64,17 +65,13 @@ class HomeFragment : Fragment() {
     }
 
     private fun setupRecyclerViews() {
-        recommendationsAdapter = MovieAdapter { movie ->
-            onMovieClicked(movie)
-        }
+        recommendationsAdapter = MovieAdapter { movie -> onMovieClicked(movie) }
         binding.rvRecommendations.apply {
             layoutManager = LinearLayoutManager(context, LinearLayoutManager.HORIZONTAL, false)
             adapter = recommendationsAdapter
         }
 
-        newReleasesAdapter = MovieAdapter { movie ->
-            onMovieClicked(movie)
-        }
+        newReleasesAdapter = MovieAdapter { movie -> onMovieClicked(movie) }
         binding.rvNewReleases.apply {
             layoutManager = LinearLayoutManager(context, LinearLayoutManager.HORIZONTAL, false)
             adapter = newReleasesAdapter
@@ -88,13 +85,9 @@ class HomeFragment : Fragment() {
                 binding.shimmerRecommendations.startShimmer()
                 binding.shimmerNewReleases.startShimmer()
             } else {
-                binding.shimmerFeatured.stopShimmer()
-                binding.shimmerFeatured.hideShimmer()
-                binding.shimmerRecommendations.stopShimmer()
-                binding.shimmerRecommendations.hideShimmer()
-                binding.shimmerNewReleases.stopShimmer()
-                binding.shimmerNewReleases.hideShimmer()
-                
+                binding.shimmerFeatured.apply { stopShimmer(); visibility = View.VISIBLE }
+                binding.shimmerRecommendations.apply { stopShimmer(); visibility = View.VISIBLE }
+                binding.shimmerNewReleases.apply { stopShimmer(); visibility = View.VISIBLE }
                 binding.progressBar.visibility = View.GONE
             }
         }
@@ -106,19 +99,15 @@ class HomeFragment : Fragment() {
         }
 
         viewModel.topRatedMovies.observe(viewLifecycleOwner) { movies ->
-            movies?.let { 
-                recommendationsAdapter.submitList(it)
-            }
+            movies?.let { recommendationsAdapter?.submitList(it) }
         }
 
         viewModel.nowPlayingMovies.observe(viewLifecycleOwner) { movies ->
-            movies?.let { 
-                newReleasesAdapter.submitList(it)
-            }
+            movies?.let { newReleasesAdapter?.submitList(it) }
         }
 
         viewModel.errorMessage.observe(viewLifecycleOwner) { error ->
-            if (!error.isNullOrEmpty()) {
+            if (!error.isNullOrEmpty() && isAdded) {
                 Toast.makeText(context, error, Toast.LENGTH_LONG).show()
             }
         }
@@ -151,19 +140,17 @@ class HomeFragment : Fragment() {
             placeholder(R.drawable.login_bg_gradient)
         }
 
-        lifecycleScope.launch {
+        viewLifecycleOwner.lifecycleScope.launch {
             try {
                 val resp = withContext(Dispatchers.IO) { 
                     RetrofitClient.instance.getMovieDetails(movie.id) 
                 }
-                if (resp.isSuccessful) {
+                if (resp.isSuccessful && isAdded) {
                     val details = resp.body()
                     val director = details?.credits?.crew?.find { it.job?.equals("Director", true) == true }?.name
                     binding.featuredMovieDirector.text = director ?: ""
                 }
-            } catch (e: Exception) {
-                // Ignore
-            }
+            } catch (e: Exception) { /* Ignore */ }
         }
         
         binding.featuredMovieCard.setOnClickListener {
@@ -172,12 +159,16 @@ class HomeFragment : Fragment() {
     }
 
     private fun onMovieClicked(movie: Movie) {
-        val bundle = Bundle().apply { putInt("movieId", movie.id) }
-        findNavController().navigate(resId = R.id.movieDetailFragment, args = bundle)
+        if (isAdded) {
+            val bundle = Bundle().apply { putInt("movieId", movie.id) }
+            findNavController().navigate(resId = R.id.movieDetailFragment, args = bundle)
+        }
     }
 
     override fun onDestroyView() {
         super.onDestroyView()
+        recommendationsAdapter = null
+        newReleasesAdapter = null
         _binding = null
     }
 }

@@ -1,5 +1,6 @@
 package com.example.watchive.ui.detail
 
+import android.content.Context
 import android.content.Intent
 import android.content.res.ColorStateList
 import android.os.Bundle
@@ -37,6 +38,7 @@ class MovieDetailFragment : Fragment() {
     private lateinit var watchlistRepo: WatchlistRepository
     private var currentMovie: Movie? = null
     private var isSaved = false
+    private var userId: Int = -1
 
     companion object {
         const val ARG_MOVIE_ID = "movieId"
@@ -57,6 +59,10 @@ class MovieDetailFragment : Fragment() {
         binding.btnBack.setOnClickListener { requireActivity().onBackPressedDispatcher.onBackPressed() }
 
         watchlistRepo = WatchlistRepository.create(requireContext())
+        
+        // Ambil userId dari SharedPreferences
+        val sharedPref = requireContext().getSharedPreferences("user_prefs", Context.MODE_PRIVATE)
+        userId = sharedPref.getInt("user_id", -1)
 
         actorAdapter = ActorAdapter(emptyList())
         binding.rvActors.apply {
@@ -78,7 +84,8 @@ class MovieDetailFragment : Fragment() {
                         bindBasicFields(mf)
                         mf.credits?.cast?.let { actorAdapter.updateData(it) }
 
-                        val exists = withContext(Dispatchers.IO) { watchlistRepo.exists(mf.id) }
+                        // Tambahkan userId ke pengecekan exists
+                        val exists = withContext(Dispatchers.IO) { watchlistRepo.exists(mf.id, userId) }
                         isSaved = exists
                         updateBookmarkIcon()
 
@@ -111,10 +118,10 @@ class MovieDetailFragment : Fragment() {
         sheetBinding.btnLikedMovies.setOnClickListener {
             lifecycleScope.launch(Dispatchers.IO) {
                 if (isSaved) {
-                    watchlistRepo.remove(movie.id)
+                    watchlistRepo.remove(movie.id, userId) // Tambahkan userId
                     isSaved = false
                 } else {
-                    watchlistRepo.add(movie)
+                    watchlistRepo.add(movie, userId) // Tambahkan userId
                     isSaved = true
                 }
                 withContext(Dispatchers.Main) {
@@ -129,7 +136,8 @@ class MovieDetailFragment : Fragment() {
         // Folders List
         val db = AppDatabase.getInstance(requireContext())
         lifecycleScope.launch {
-            val folders = withContext(Dispatchers.IO) { db.folderDao().getAllFoldersStatic() }
+            // Tambahkan userId saat mengambil daftar folder
+            val folders = withContext(Dispatchers.IO) { db.folderDao().getAllFoldersStatic(userId) }
             if (folders.isNotEmpty()) {
                 sheetBinding.rvFoldersList.layoutManager = LinearLayoutManager(context)
                 sheetBinding.rvFoldersList.adapter = FolderSelectionAdapter(folders) { selectedFolder ->

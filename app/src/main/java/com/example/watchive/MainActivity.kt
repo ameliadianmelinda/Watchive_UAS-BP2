@@ -12,7 +12,7 @@ class MainActivity : AppCompatActivity() {
         super.onCreate(savedInstanceState)
         setContentView(R.layout.activity_main)
 
-        // Menggunakan cara yang lebih aman untuk mengambil NavController pada FragmentContainerView
+        // Cara inisialisasi NavController yang paling standar dan stabil
         val navHostFragment = supportFragmentManager
             .findFragmentById(R.id.nav_host_fragment) as NavHostFragment
         val navController = navHostFragment.navController

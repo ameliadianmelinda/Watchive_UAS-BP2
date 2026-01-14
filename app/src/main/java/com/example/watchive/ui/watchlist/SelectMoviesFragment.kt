@@ -1,5 +1,6 @@
 package com.example.watchive.ui.watchlist
 
+import android.content.Context
 import android.os.Bundle
 import android.view.LayoutInflater
 import android.view.View
@@ -52,7 +53,8 @@ class SelectMoviesFragment : Fragment() {
     private fun setupRecyclerView() {
         lifecycleScope.launch {
             try {
-                // Ambil film populer dari API (sebagai perwakilan "semua film")
+                binding.rvSelectMovies.visibility = View.GONE
+                // Ambil film populer dari API
                 val response = withContext(Dispatchers.IO) {
                     RetrofitClient.instance.getPopularMovies(page = 1)
                 }
@@ -60,15 +62,13 @@ class SelectMoviesFragment : Fragment() {
                 if (response.isSuccessful) {
                     val apiMovies = response.body()?.movies ?: emptyList()
                     
-                    // Kita perlu mengonversi Movie (API) ke WatchlistMovie (Local) untuk adapter jika diperlukan, 
-                    // atau ubah adapter agar menerima Movie. Mari kita gunakan data class Movie saja.
-                    
                     val adapter = SelectMoviesAdapter(apiMovies) { movie, isSelected ->
                         if (isSelected) selectedMovies.add(movie) else selectedMovies.remove(movie)
                     }
                     
                     binding.rvSelectMovies.layoutManager = LinearLayoutManager(context)
                     binding.rvSelectMovies.adapter = adapter
+                    binding.rvSelectMovies.visibility = View.VISIBLE
                 } else {
                     Toast.makeText(context, "Gagal memuat daftar film", Toast.LENGTH_SHORT).show()
                 }
@@ -89,18 +89,35 @@ class SelectMoviesFragment : Fragment() {
                 return@setOnClickListener
             }
 
+            val sharedPref = requireContext().getSharedPreferences("user_prefs", Context.MODE_PRIVATE)
+            val userId = sharedPref.getInt("user_id", -1)
+
+            if (userId == -1) {
+                Toast.makeText(context, "Sesi berakhir, silakan login kembali", Toast.LENGTH_SHORT).show()
+                return@setOnClickListener
+            }
+
+            // OPTIMASI: Gunakan Batch Insert agar tidak ANR (Not Responding)
             lifecycleScope.launch(Dispatchers.IO) {
                 val db = AppDatabase.getInstance(requireContext())
-                selectedMovies.forEach { movie ->
-                    // 1. Pastikan film ada di tabel watchlist (karena foreign key)
-                    db.watchlistDao().insert(WatchlistMovie.fromMovie(movie))
-                    
-                    // 2. Tambahkan ke folder
-                    db.folderDao().addMovieToFolder(FolderMovieJoin(folderId, movie.id))
-                }
-                withContext(Dispatchers.Main) {
-                    Toast.makeText(context, "${selectedMovies.size} film ditambahkan ke folder", Toast.LENGTH_SHORT).show()
-                    findNavController().navigateUp()
+                
+                // 1. Siapkan data masal
+                val moviesToInsert = selectedMovies.map { WatchlistMovie.fromMovie(it, userId) }
+                val folderJoins = selectedMovies.map { FolderMovieJoin(folderId, it.id) }
+
+                try {
+                    // 2. Simpan sekaligus
+                    db.watchlistDao().insertAll(moviesToInsert)
+                    db.folderDao().addMoviesToFolder(folderJoins)
+
+                    withContext(Dispatchers.Main) {
+                        Toast.makeText(context, "${selectedMovies.size} film ditambahkan", Toast.LENGTH_SHORT).show()
+                        findNavController().navigateUp()
+                    }
+                } catch (e: Exception) {
+                    withContext(Dispatchers.Main) {
+                        Toast.makeText(context, "Gagal menyimpan: ${e.message}", Toast.LENGTH_SHORT).show()
+                    }
                 }
             }
         }
