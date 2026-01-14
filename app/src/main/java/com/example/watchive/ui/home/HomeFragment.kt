@@ -41,7 +41,8 @@ class HomeFragment : Fragment() {
     }
 
     private fun setupRecyclerViews() {
-        recommendationsAdapter = MovieAdapter(emptyList()) { movie ->
+        // Perbaikan cara inisialisasi MovieAdapter (ListAdapter tidak butuh list di constructor)
+        recommendationsAdapter = MovieAdapter(null) { movie ->
             onMovieClicked(movie)
         }
         binding.rvRecommendations.apply {
@@ -49,7 +50,7 @@ class HomeFragment : Fragment() {
             adapter = recommendationsAdapter
         }
 
-        newReleasesAdapter = MovieAdapter(emptyList()) { movie ->
+        newReleasesAdapter = MovieAdapter(null) { movie ->
             onMovieClicked(movie)
         }
         binding.rvNewReleases.apply {
@@ -59,6 +60,10 @@ class HomeFragment : Fragment() {
     }
 
     private fun observeViewModel() {
+        viewModel.isLoading.observe(viewLifecycleOwner) { isLoading ->
+            binding.progressBar.visibility = if (isLoading) View.VISIBLE else View.GONE
+        }
+
         viewModel.popularMovies.observe(viewLifecycleOwner) { movies ->
             if (!movies.isNullOrEmpty()) {
                 setupFeaturedMovie(movies[0])
@@ -66,15 +71,19 @@ class HomeFragment : Fragment() {
         }
 
         viewModel.topRatedMovies.observe(viewLifecycleOwner) { movies ->
-            movies?.let { recommendationsAdapter.updateData(it) }
+            movies?.let { recommendationsAdapter.submitList(it) }
         }
 
         viewModel.nowPlayingMovies.observe(viewLifecycleOwner) { movies ->
-            movies?.let { newReleasesAdapter.updateData(it) }
+            movies?.let { newReleasesAdapter.submitList(it) }
         }
 
         viewModel.errorMessage.observe(viewLifecycleOwner) { error ->
-            error?.let { Toast.makeText(context, it, Toast.LENGTH_LONG).show() }
+            error?.let { 
+                if (it.isNotEmpty()) {
+                    Toast.makeText(context, it, Toast.LENGTH_LONG).show()
+                }
+            }
         }
     }
 
@@ -85,6 +94,7 @@ class HomeFragment : Fragment() {
         val imageUrl = "https://image.tmdb.org/t/p/w500${movie.posterPath}"
         binding.featuredMoviePoster.load(imageUrl) {
             crossfade(true)
+            placeholder(R.drawable.login_bg_gradient)
         }
         
         binding.featuredMovieCard.setOnClickListener {
@@ -94,7 +104,6 @@ class HomeFragment : Fragment() {
 
     private fun onMovieClicked(movie: Movie) {
         Toast.makeText(context, "Clicked: ${movie.title}", Toast.LENGTH_SHORT).show()
-        // Kita akan tambahkan navigasi ke detail film nanti
     }
 
     override fun onDestroyView() {

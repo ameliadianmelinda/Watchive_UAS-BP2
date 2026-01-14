@@ -13,7 +13,6 @@ import com.example.watchive.data.local.AppDatabase
 import com.example.watchive.data.local.FolderMovieJoin
 import com.example.watchive.data.local.WatchlistMovie
 import com.example.watchive.data.remote.RetrofitClient
-import com.example.watchive.data.remote.model.Movie
 import com.example.watchive.databinding.FragmentSelectMoviesBinding
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
@@ -25,7 +24,8 @@ class SelectMoviesFragment : Fragment() {
     private val binding get() = _binding!!
 
     private var folderId: Int = -1
-    private val selectedMovies = mutableSetOf<Movie>()
+    // Mengubah Set menjadi WatchlistMovie agar sesuai dengan tipe data adapter
+    private val selectedMovies = mutableSetOf<WatchlistMovie>()
 
     override fun onCreateView(
         inflater: LayoutInflater,
@@ -52,7 +52,6 @@ class SelectMoviesFragment : Fragment() {
     private fun setupRecyclerView() {
         lifecycleScope.launch {
             try {
-                // Ambil film populer dari API (sebagai perwakilan "semua film")
                 val response = withContext(Dispatchers.IO) {
                     RetrofitClient.instance.getPopularMovies(page = 1)
                 }
@@ -60,10 +59,10 @@ class SelectMoviesFragment : Fragment() {
                 if (response.isSuccessful) {
                     val apiMovies = response.body()?.movies ?: emptyList()
                     
-                    // Kita perlu mengonversi Movie (API) ke WatchlistMovie (Local) untuk adapter jika diperlukan, 
-                    // atau ubah adapter agar menerima Movie. Mari kita gunakan data class Movie saja.
+                    // Konversi Movie (API) ke WatchlistMovie (Local) agar bisa diterima Adapter
+                    val watchlistMovies = apiMovies.map { WatchlistMovie.fromMovie(it) }
                     
-                    val adapter = SelectMoviesAdapter(apiMovies) { movie, isSelected ->
+                    val adapter = SelectMoviesAdapter(watchlistMovies) { movie, isSelected ->
                         if (isSelected) selectedMovies.add(movie) else selectedMovies.remove(movie)
                     }
                     
@@ -91,12 +90,12 @@ class SelectMoviesFragment : Fragment() {
 
             lifecycleScope.launch(Dispatchers.IO) {
                 val db = AppDatabase.getInstance(requireContext())
-                selectedMovies.forEach { movie ->
-                    // 1. Pastikan film ada di tabel watchlist (karena foreign key)
-                    db.watchlistDao().insert(WatchlistMovie.fromMovie(movie))
+                selectedMovies.forEach { watchlistMovie ->
+                    // 1. Simpan/Update film ke tabel watchlist (Local Database)
+                    db.watchlistDao().insert(watchlistMovie)
                     
-                    // 2. Tambahkan ke folder
-                    db.folderDao().addMovieToFolder(FolderMovieJoin(folderId, movie.id))
+                    // 2. Hubungkan film tersebut ke folder yang dipilih
+                    db.folderDao().addMovieToFolder(FolderMovieJoin(folderId, watchlistMovie.id))
                 }
                 withContext(Dispatchers.Main) {
                     Toast.makeText(context, "${selectedMovies.size} film ditambahkan ke folder", Toast.LENGTH_SHORT).show()

@@ -1,5 +1,6 @@
 package com.example.watchive
 
+import android.content.Context
 import android.content.Intent
 import androidx.appcompat.app.AppCompatActivity
 import android.os.Bundle
@@ -35,13 +36,19 @@ class LoginActivity : AppCompatActivity() {
             if (email.isNotEmpty() && password.isNotEmpty()) {
                 lifecycleScope.launch {
                     val user = db.userDao().getUserByEmail(email)
-                    runOnUiThread {
-                        if (user != null && user.password == password) {
+                    if (user != null && user.password == password) {
+                        // Simpan email ke SharedPreferences sebagai session
+                        val sharedPref = getSharedPreferences("user_prefs", Context.MODE_PRIVATE)
+                        sharedPref.edit().putString("user_email", email).apply()
+
+                        runOnUiThread {
                             Toast.makeText(this@LoginActivity, "Login berhasil", Toast.LENGTH_SHORT).show()
                             val intent = Intent(this@LoginActivity, MainActivity::class.java)
                             startActivity(intent)
                             finish()
-                        } else {
+                        }
+                    } else {
+                        runOnUiThread {
                             Toast.makeText(this@LoginActivity, "Login gagal, periksa kembali email dan password", Toast.LENGTH_SHORT).show()
                         }
                     }
