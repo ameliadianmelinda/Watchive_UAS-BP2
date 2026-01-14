@@ -56,4 +56,13 @@
             app:argType="integer" />
     </fragment>
 
+    <dialog
+        android:id="@+id/addToPlaylistBottomSheet"
+        android:name="com.example.watchive.ui.watchlist.AddToPlaylistBottomSheet"
+        android:label="Add to Playlist">
+        <argument
+            android:name="movieId"
+            app:argType="integer" />
+    </dialog>
+
 </navigation>

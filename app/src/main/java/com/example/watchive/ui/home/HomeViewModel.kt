@@ -5,12 +5,13 @@ import androidx.lifecycle.MutableLiveData
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.example.watchive.data.remote.RetrofitClient
+import com.example.watchive.data.remote.TmdbApiService
 import com.example.watchive.data.remote.model.Movie
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
 
-class HomeViewModel : ViewModel() {
+class HomeViewModel(private val apiService: TmdbApiService = RetrofitClient.instance) : ViewModel() {
 
     private val _popularMovies = MutableLiveData<List<Movie>>()
     val popularMovies: LiveData<List<Movie>> = _popularMovies
@@ -27,17 +28,23 @@ class HomeViewModel : ViewModel() {
     private val _errorMessage = MutableLiveData<String>()
     val errorMessage: LiveData<String> = _errorMessage
 
+    // Pagination state
+    private var topRatedPage = 1
+    private var topRatedTotalPages = 1
+    private var nowPlayingPage = 1
+    private var nowPlayingTotalPages = 1
+
     init {
         fetchAllMovies()
     }
 
-    private fun fetchAllMovies() {
+    fun fetchAllMovies() {
         _isLoading.value = true
         viewModelScope.launch {
             try {
-                val popularResponse = RetrofitClient.instance.getPopularMovies()
-                val topRatedResponse = RetrofitClient.instance.getTopRatedMovies(page = 1)
-                val nowPlayingResponse = RetrofitClient.instance.getNowPlayingMovies(page = 1)
+                val popularResponse = apiService.getPopularMovies()
+                val topRatedResponse = apiService.getTopRatedMovies(page = 1)
+                val nowPlayingResponse = apiService.getNowPlayingMovies(page = 1)
 
                 if (popularResponse.isSuccessful) _popularMovies.postValue(popularResponse.body()?.movies)
                 if (topRatedResponse.isSuccessful) _topRatedMovies.postValue(topRatedResponse.body()?.movies)
@@ -56,18 +63,11 @@ class HomeViewModel : ViewModel() {
         }
     }
 
-    // Pagination state
-    private var topRatedPage = 1
-    private var topRatedTotalPages = 1
-
-    private var nowPlayingPage = 1
-    private var nowPlayingTotalPages = 1
-
     fun loadMoreTopRated() {
         if (topRatedPage >= topRatedTotalPages) return
         viewModelScope.launch {
             val next = topRatedPage + 1
-            val resp = withContext(Dispatchers.IO) { try { RetrofitClient.instance.getTopRatedMovies(page = next) } catch (e: Exception) { null } }
+            val resp = withContext(Dispatchers.IO) { try { apiService.getTopRatedMovies(page = next) } catch (e: Exception) { null } }
             if (resp != null && resp.isSuccessful) {
                 val newMovies = resp.body()?.movies ?: emptyList()
                 val current = _topRatedMovies.value ?: emptyList()
@@ -82,7 +82,7 @@ class HomeViewModel : ViewModel() {
         if (nowPlayingPage >= nowPlayingTotalPages) return
         viewModelScope.launch {
             val next = nowPlayingPage + 1
-            val resp = withContext(Dispatchers.IO) { try { RetrofitClient.instance.getNowPlayingMovies(page = next) } catch (e: Exception) { null } }
+            val resp = withContext(Dispatchers.IO) { try { apiService.getNowPlayingMovies(page = next) } catch (e: Exception) { null } }
             if (resp != null && resp.isSuccessful) {
                 val newMovies = resp.body()?.movies ?: emptyList()
                 val current = _nowPlayingMovies.value ?: emptyList()

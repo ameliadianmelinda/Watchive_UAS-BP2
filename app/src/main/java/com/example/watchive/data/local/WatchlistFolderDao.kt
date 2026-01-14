@@ -20,7 +20,7 @@ interface WatchlistFolderDao {
     suspend fun getFolderById(folderId: Int, userId: Int): WatchlistFolder?
 
     @Insert(onConflict = OnConflictStrategy.REPLACE)
-    suspend fun insertFolder(folder: WatchlistFolder)
+    suspend fun insertFolder(folder: WatchlistFolder): Long
 
     @Update
     suspend fun updateFolder(folder: WatchlistFolder)

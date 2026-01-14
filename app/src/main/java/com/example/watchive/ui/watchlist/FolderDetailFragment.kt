@@ -1,17 +1,23 @@
 package com.example.watchive.ui.watchlist
 
+import android.content.Context
+import android.content.res.ColorStateList
+import android.graphics.Color
 import android.os.Bundle
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
+import android.widget.Button
 import android.widget.EditText
+import android.widget.TextView
 import android.widget.Toast
 import androidx.appcompat.app.AlertDialog
+import androidx.core.content.ContextCompat
 import androidx.fragment.app.Fragment
 import androidx.fragment.app.viewModels
 import androidx.lifecycle.lifecycleScope
 import androidx.navigation.fragment.findNavController
-import androidx.recyclerview.widget.LinearLayoutManager
+import androidx.recyclerview.widget.GridLayoutManager
 import com.example.watchive.R
 import com.example.watchive.data.local.AppDatabase
 import com.example.watchive.data.local.FolderMovieJoin
@@ -52,12 +58,48 @@ class FolderDetailFragment : Fragment() {
         setupRecyclerView()
         observeViewModel()
         setupListeners()
+        applyTheme()
 
         viewModel.loadFolder(folderId)
     }
 
+    private fun applyTheme() {
+        val sharedPref = requireActivity().getSharedPreferences("ThemePrefs", Context.MODE_PRIVATE)
+        val isDarkMode = sharedPref.getBoolean("isDarkMode", true)
+        
+        val context = requireContext()
+        val brandColor = ContextCompat.getColor(context, R.color.brand)
+        val darkPurple = ContextCompat.getColor(context, R.color.purple_dark)
+
+        if (!isDarkMode) {
+            binding.root.setBackgroundColor(brandColor)
+            
+            binding.tvFolderTitle.setTextColor(darkPurple)
+            binding.tvFolderDesc.setTextColor(darkPurple)
+            binding.btnBack.imageTintList = ColorStateList.valueOf(darkPurple)
+            binding.btnMore.imageTintList = ColorStateList.valueOf(darkPurple)
+            
+            binding.btnAddMovieToFolder.backgroundTintList = ColorStateList.valueOf(darkPurple)
+            binding.btnAddMovieToFolder.imageTintList = ColorStateList.valueOf(Color.WHITE)
+
+            updateAllTextViewsColor(binding.root as ViewGroup, darkPurple)
+        }
+    }
+
+    private fun updateAllTextViewsColor(viewGroup: ViewGroup, color: Int) {
+        for (i in 0 until viewGroup.childCount) {
+            val child = viewGroup.getChildAt(i)
+            if (child is TextView && child !is Button) {
+                child.setTextColor(color)
+            } else if (child is ViewGroup) {
+                updateAllTextViewsColor(child, color)
+            }
+        }
+    }
+
     private fun setupRecyclerView() {
         adapter = MovieAdapter(
+            useGridLayout = true,
             onLongClick = { movie ->
                 showRemoveMovieFromFolderDialog(movie)
             },
@@ -66,19 +108,19 @@ class FolderDetailFragment : Fragment() {
                 findNavController().navigate(resId = R.id.movieDetailFragment, args = bundle)
             }
         )
-        binding.rvFolderMovies.layoutManager = LinearLayoutManager(context)
+        binding.rvFolderMovies.layoutManager = GridLayoutManager(context, 2)
         binding.rvFolderMovies.adapter = adapter
     }
 
     private fun showRemoveMovieFromFolderDialog(movie: Movie) {
         AlertDialog.Builder(requireContext())
-            .setTitle("Hapus dari Folder")
-            .setMessage("Hapus '${movie.title}' dari folder ini?")
-            .setPositiveButton("Hapus") { _, _ ->
+            .setTitle(getString(R.string.folder_remove_movie_title))
+            .setMessage(getString(R.string.folder_remove_movie_message, movie.title))
+            .setPositiveButton(getString(R.string.delete)) { _, _ ->
                 viewModel.removeMovieFromFolder(folderId, movie.id)
-                Toast.makeText(context, "${movie.title} dihapus dari folder", Toast.LENGTH_SHORT).show()
+                Toast.makeText(context, getString(R.string.folder_remove_movie_success, movie.title), Toast.LENGTH_SHORT).show()
             }
-            .setNegativeButton("Batal", null)
+            .setNegativeButton(getString(R.string.cancel), null)
             .show()
     }
 
@@ -86,13 +128,19 @@ class FolderDetailFragment : Fragment() {
         viewModel.folder.observe(viewLifecycleOwner) { folder ->
             folder?.let {
                 binding.tvFolderTitle.text = it.title
-                binding.tvFolderDesc.text = it.description ?: "Tidak ada deskripsi"
+                binding.tvFolderDesc.text = it.description ?: getString(R.string.no_description)
             }
         }
 
-        // PERBAIKAN: Menambahkan viewModel.userId sebagai parameter kedua
         viewModel.getMoviesInFolder(folderId).observe(viewLifecycleOwner) { movies ->
-            adapter.submitList(movies.map { it.toMovie() })
+            if (movies.isNullOrEmpty()) {
+                binding.rvFolderMovies.visibility = View.GONE
+                binding.tvEmptyFolder.visibility = View.VISIBLE
+            } else {
+                binding.rvFolderMovies.visibility = View.VISIBLE
+                binding.tvEmptyFolder.visibility = View.GONE
+                adapter.submitList(movies.map { it.toMovie() })
+            }
         }
     }
 
@@ -106,15 +154,14 @@ class FolderDetailFragment : Fragment() {
         }
 
         binding.btnAddMovieToFolder.setOnClickListener {
-            // Langsung navigasi ke halaman multi-select film
             val bundle = Bundle().apply { putInt("folderId", folderId) }
-            findNavController().navigate(R.id.selectMoviesFragment, bundle)
+            findNavController().navigate(resId = R.id.selectMoviesFragment, args = bundle)
         }
     }
 
     private fun showMenuDialog() {
-        val options = arrayOf("Edit Nama Folder", "Hapus Folder")
-        AlertDialog.Builder(requireContext())
+        val options = arrayOf(getString(R.string.menu_edit_folder), getString(R.string.menu_delete_folder))
+        val dialog = AlertDialog.Builder(requireContext())
             .setItems(options) { _, which ->
                 when (which) {
                     0 -> showEditDialog()
@@ -122,6 +169,13 @@ class FolderDetailFragment : Fragment() {
                 }
             }
             .show()
+            
+        // Styling List Dialog jika Mode Matahari
+        val isDarkMode = requireActivity().getSharedPreferences("ThemePrefs", Context.MODE_PRIVATE).getBoolean("isDarkMode", true)
+        if (!isDarkMode) {
+            val darkPurple = ContextCompat.getColor(requireContext(), R.color.purple_dark)
+            dialog.window?.setBackgroundDrawableResource(R.color.brand)
+        }
     }
 
     private fun showEditDialog() {
@@ -133,30 +187,62 @@ class FolderDetailFragment : Fragment() {
         etTitle.setText(currentFolder.title)
         etDesc.setText(currentFolder.description)
 
-        AlertDialog.Builder(requireContext())
-            .setTitle("Edit Folder")
+        val dialog = AlertDialog.Builder(requireContext())
+            .setTitle(getString(R.string.dialog_edit_folder_title))
             .setView(view)
-            .setPositiveButton("Simpan") { _, _ ->
+            .setPositiveButton(getString(R.string.save)) { _, _ ->
                 val newTitle = etTitle.text.toString()
                 val newDesc = etDesc.text.toString()
                 viewModel.updateFolder(folderId, newTitle, newDesc)
             }
-            .setNegativeButton("Batal", null)
-            .show()
+            .setNegativeButton(getString(R.string.cancel), null)
+            .create()
+
+        dialog.show()
+
+        // LOGIKA TEMA DIALOG
+        val isDarkMode = requireActivity().getSharedPreferences("ThemePrefs", Context.MODE_PRIVATE).getBoolean("isDarkMode", true)
+        if (!isDarkMode) {
+            val darkPurple = ContextCompat.getColor(requireContext(), R.color.purple_dark)
+            val brandColor = ContextCompat.getColor(requireContext(), R.color.brand)
+            
+            // Ubah Warna Background Dialog
+            dialog.window?.setBackgroundDrawableResource(R.color.brand)
+            
+            // Ubah Warna Teks Input
+            etTitle.setTextColor(darkPurple)
+            etTitle.setHintTextColor(Color.parseColor("#8A320174"))
+            etDesc.setTextColor(darkPurple)
+            etDesc.setHintTextColor(Color.parseColor("#8A320174"))
+            
+            // Ubah Warna Tombol Dialog
+            dialog.getButton(AlertDialog.BUTTON_POSITIVE).setTextColor(darkPurple)
+            dialog.getButton(AlertDialog.BUTTON_NEGATIVE).setTextColor(darkPurple)
+        }
     }
 
     private fun showDeleteConfirmDialog() {
-        AlertDialog.Builder(requireContext())
-            .setTitle("Hapus Folder")
-            .setMessage("Apakah Anda yakin ingin menghapus folder ini?")
-            .setPositiveButton("Hapus") { _, _ ->
+        val dialog = AlertDialog.Builder(requireContext())
+            .setTitle(getString(R.string.dialog_delete_folder_title))
+            .setMessage(getString(R.string.dialog_delete_folder_message))
+            .setPositiveButton(getString(R.string.delete)) { _, _ ->
                 viewModel.folder.value?.let {
                     viewModel.deleteFolder(it)
                     findNavController().navigateUp()
                 }
             }
-            .setNegativeButton("Batal", null)
-            .show()
+            .setNegativeButton(getString(R.string.cancel), null)
+            .create()
+            
+        dialog.show()
+        
+        val isDarkMode = requireActivity().getSharedPreferences("ThemePrefs", Context.MODE_PRIVATE).getBoolean("isDarkMode", true)
+        if (!isDarkMode) {
+            val darkPurple = ContextCompat.getColor(requireContext(), R.color.purple_dark)
+            dialog.window?.setBackgroundDrawableResource(R.color.brand)
+            dialog.getButton(AlertDialog.BUTTON_POSITIVE).setTextColor(darkPurple)
+            dialog.getButton(AlertDialog.BUTTON_NEGATIVE).setTextColor(darkPurple)
+        }
     }
 
     override fun onDestroyView() {

@@ -5,32 +5,36 @@
     <!-- Splash -->
     <string name="splash_title">WATCHIVE</string>
 
-    <string name="login_title">Welcome Back</string>
-    <string name="login_subtitle">Log in to continue</string>
-    <string name="hint_email">Email</string>
-    <string name="hint_password">Password</string>
-    <string name="btn_login">Login</string>
-    <string name="dont_have_account">Don’t have an account?</string>
-    <string name="signup_here">Sign up here</string>
     <string name="lupa_password"><u>Lupa Password?</u></string>
     <string name="synopsis">Sinopsis</string>
     <string name="actors">Aktor</string>
     <string name="back">Back</string>
-    <string name="year_director_format">%1$s - Directed by</string>
-    <string name="year_director_director_format">%1$s - Directed by %2$s</string>
 
     <!-- Watchlist -->
     <string name="watchlist_title">Watchlist</string>
     <string name="watchlist_search_hint">Cari di Daftar Tontonan</string>
     <string name="watchlist_empty_title">Daftar pantauan Anda kosong</string>
-    <string name="watchlist_empty_sub">Tambahkan film dari halaman beranda ke mulailah mengumpulkan favorit Anda.</string>
     <string name="watchlist_explore">Jelajahi Film</string>
     <string name="add">Add</string>
-    <string name="search">Search</string>
+
     <!-- Home strings -->
     <string name="search_hint">Cari Film</string>
     <string name="popular_title">Film Populer</string>
     <string name="recommendations_title">Rekomendasi Untukmu</string>
     <string name="new_releases_title">Baru Rilis</string>
     <string name="year_format">(%1$s)</string>
+
+    <!-- Folder Detail -->
+    <string name="folder_remove_movie_title">Hapus dari Folder</string>
+    <string name="folder_remove_movie_message">Hapus \'%1$s\' dari folder ini?</string>
+    <string name="folder_remove_movie_success">%1$s dihapus dari folder</string>
+    <string name="delete">Hapus</string>
+    <string name="cancel">Batal</string>
+    <string name="save">Simpan</string>
+    <string name="no_description">Tidak ada deskripsi</string>
+    <string name="menu_edit_folder">Edit Nama Folder</string>
+    <string name="menu_delete_folder">Hapus Folder</string>
+    <string name="dialog_edit_folder_title">Edit Folder</string>
+    <string name="dialog_delete_folder_title">Hapus Folder</string>
+    <string name="dialog_delete_folder_message">Apakah Anda yakin ingin menghapus folder ini?</string>
 </resources>

@@ -6,7 +6,10 @@
     android:layout_height="match_parent"
     android:background="#121212"
     android:orientation="vertical"
-    android:padding="16dp">
+    android:paddingStart="16dp"
+    android:paddingEnd="16dp"
+    android:paddingTop="48dp"
+    android:paddingBottom="16dp">
 
     <RelativeLayout
         android:layout_width="match_parent"
@@ -18,9 +21,12 @@
             android:layout_height="40dp"
             android:background="@drawable/back_button_background"
             android:src="@drawable/ic_back"
-            app:tint="@color/white" />
+            android:scaleType="center"
+            app:tint="@color/white"
+            android:contentDescription="Back" />
 
         <TextView
+            android:id="@+id/tv_title_header"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:layout_centerInParent="true"
@@ -39,6 +45,48 @@
             android:textColor="#6B4CE6"
             android:textStyle="bold" />
     </RelativeLayout>
+
+    <!-- Search Bar - Samakan dengan Beranda/Watchlist -->
+    <LinearLayout
+        android:id="@+id/search_container"
+        android:layout_width="match_parent"
+        android:layout_height="50dp"
+        android:layout_marginTop="16dp"
+        android:background="@drawable/rounded_edittext"
+        android:gravity="center_vertical"
+        android:orientation="horizontal"
+        android:paddingStart="16dp"
+        android:paddingEnd="16dp">
+
+        <EditText
+            android:id="@+id/et_search_movies"
+            android:layout_width="0dp"
+            android:layout_height="match_parent"
+            android:layout_weight="1"
+            android:background="@null"
+            android:hint="Cari judul film..."
+            android:imeOptions="actionSearch"
+            android:inputType="text"
+            android:textColor="@color/white"
+            android:textColorHint="#8E8E93"
+            android:textSize="15sp"
+            android:importantForAutofill="no" />
+
+        <ImageView
+            android:id="@+id/iv_search_icon"
+            android:layout_width="20dp"
+            android:layout_height="20dp"
+            android:src="@android:drawable/ic_menu_search"
+            app:tint="#8E8E93" />
+    </LinearLayout>
+
+    <ProgressBar
+        android:id="@+id/progress_bar"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_gravity="center"
+        android:layout_marginTop="20dp"
+        android:visibility="gone" />
 
     <androidx.recyclerview.widget.RecyclerView
         android:id="@+id/rv_select_movies"

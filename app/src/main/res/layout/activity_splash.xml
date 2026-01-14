@@ -2,33 +2,27 @@
 <RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
-    android:background="#1A1A1A">
+    android:background="@color/black">
 
-    <LinearLayout
+    <ImageView
+        android:id="@+id/logoWatchive"
+        android:layout_width="140dp"
+        android:layout_height="140dp"
+        android:layout_centerInParent="true"
+        android:src="@drawable/logo_watchive"
+        android:contentDescription="Watchive Logo" />
+
+    <TextView
+        android:id="@+id/textWatchive"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:layout_centerInParent="true"
-        android:gravity="center"
-        android:orientation="vertical">
-
-        <!-- Menggunakan icon gallery bawaan Android untuk mengetes apakah aplikasi jalan -->
-        <ImageView
-            android:id="@+id/logoWatchive"
-            android:layout_width="120dp"
-            android:layout_height="120dp"
-            android:src="@android:drawable/ic_menu_gallery"
-            android:contentDescription="Loading Logo" />
-
-        <TextView
-            android:id="@+id/textWatchive"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:layout_marginTop="20dp"
-            android:text="WATCHIVE"
-            android:textColor="#FFFFFF"
-            android:textSize="28sp"
-            android:textStyle="bold" />
-
-    </LinearLayout>
+        android:layout_below="@id/logoWatchive"
+        android:layout_centerHorizontal="true"
+        android:layout_marginTop="12dp"
+        android:text="@string/splash_title"
+        android:textColor="@color/brand"
+        android:textSize="28sp"
+        android:textStyle="bold"
+        android:letterSpacing="0.1" />
 
 </RelativeLayout>
