@@ -35,38 +35,22 @@ class LoginActivity : AppCompatActivity() {
 
             if (email.isNotEmpty() && password.isNotEmpty()) {
                 lifecycleScope.launch {
-<<<<<<< HEAD
-                    val user = db.userDao().getUserByEmail(email)
-                    if (user != null && user.password == password) {
-                        // Simpan email ke SharedPreferences sebagai session
-                        val sharedPref = getSharedPreferences("user_prefs", Context.MODE_PRIVATE)
-                        sharedPref.edit().putString("user_email", email).apply()
-
-                        runOnUiThread {
-                            Toast.makeText(this@LoginActivity, "Login berhasil", Toast.LENGTH_SHORT).show()
-                            val intent = Intent(this@LoginActivity, MainActivity::class.java)
-                            startActivity(intent)
-                            finish()
-                        }
-                    } else {
-                        runOnUiThread {
-                            Toast.makeText(this@LoginActivity, "Login gagal, periksa kembali email dan password", Toast.LENGTH_SHORT).show()
-=======
                     try {
                         val user = db.userDao().getUserByEmail(email)
                         if (user != null && user.password == password) {
-                            // SIMPAN DATA USER DENGAN PASTI
+                            // SIMPAN DATA USER KE SESSION
                             val sharedPref = getSharedPreferences("user_prefs", Context.MODE_PRIVATE)
                             sharedPref.edit().apply {
                                 putInt("user_id", user.userId)
                                 putString("user_name", user.name)
-                                commit() // Paksa simpan saat itu juga
+                                putString("user_email", user.email)
+                                commit() // Simpan secara sinkron agar data langsung tersedia
                             }
 
                             runOnUiThread {
                                 Toast.makeText(this@LoginActivity, "Login berhasil", Toast.LENGTH_SHORT).show()
                                 val intent = Intent(this@LoginActivity, MainActivity::class.java)
-                                // FLAG_ACTIVITY_NEW_TASK dan CLEAR_TASK menghapus riwayat login agar tidak crash saat back
+                                // Bersihkan history agar tidak bisa back ke halaman login lagi
                                 intent.flags = Intent.FLAG_ACTIVITY_NEW_TASK or Intent.FLAG_ACTIVITY_CLEAR_TASK
                                 startActivity(intent)
                                 finish()
@@ -78,8 +62,7 @@ class LoginActivity : AppCompatActivity() {
                         }
                     } catch (e: Exception) {
                         runOnUiThread {
-                            Toast.makeText(this@LoginActivity, "Error Database: ${e.message}", Toast.LENGTH_LONG).show()
->>>>>>> f64f4956950dbb7c1aa94ea6d268a10e174579de
+                            Toast.makeText(this@LoginActivity, "Error: ${e.message}", Toast.LENGTH_LONG).show()
                         }
                     }
                 }
