@@ -35,6 +35,23 @@ class LoginActivity : AppCompatActivity() {
 
             if (email.isNotEmpty() && password.isNotEmpty()) {
                 lifecycleScope.launch {
+<<<<<<< HEAD
+                    val user = db.userDao().getUserByEmail(email)
+                    if (user != null && user.password == password) {
+                        // Simpan email ke SharedPreferences sebagai session
+                        val sharedPref = getSharedPreferences("user_prefs", Context.MODE_PRIVATE)
+                        sharedPref.edit().putString("user_email", email).apply()
+
+                        runOnUiThread {
+                            Toast.makeText(this@LoginActivity, "Login berhasil", Toast.LENGTH_SHORT).show()
+                            val intent = Intent(this@LoginActivity, MainActivity::class.java)
+                            startActivity(intent)
+                            finish()
+                        }
+                    } else {
+                        runOnUiThread {
+                            Toast.makeText(this@LoginActivity, "Login gagal, periksa kembali email dan password", Toast.LENGTH_SHORT).show()
+=======
                     try {
                         val user = db.userDao().getUserByEmail(email)
                         if (user != null && user.password == password) {
@@ -62,6 +79,7 @@ class LoginActivity : AppCompatActivity() {
                     } catch (e: Exception) {
                         runOnUiThread {
                             Toast.makeText(this@LoginActivity, "Error Database: ${e.message}", Toast.LENGTH_LONG).show()
+>>>>>>> f64f4956950dbb7c1aa94ea6d268a10e174579de
                         }
                     }
                 }
