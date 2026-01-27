@@ -15,21 +15,20 @@ import android.widget.Toast
 import androidx.core.content.ContextCompat
 import androidx.fragment.app.Fragment
 import androidx.fragment.app.viewModels
+import androidx.lifecycle.lifecycleScope
+import androidx.navigation.fragment.findNavController
 import androidx.recyclerview.widget.LinearLayoutManager
 import coil.load
 import com.example.watchive.R
+import com.example.watchive.data.remote.RetrofitClient
 import com.example.watchive.data.remote.model.Movie
 import com.example.watchive.databinding.FragmentHomeBinding
 import com.example.watchive.ui.adapter.MovieAdapter
-<<<<<<< HEAD
-=======
-import com.example.watchive.data.remote.RetrofitClient
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.Job
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
->>>>>>> f64f4956950dbb7c1aa94ea6d268a10e174579de
 
 class HomeFragment : Fragment() {
 
@@ -58,15 +57,6 @@ class HomeFragment : Fragment() {
 
         setupRecyclerViews()
         observeViewModel()
-<<<<<<< HEAD
-    }
-
-    private fun setupRecyclerViews() {
-        // Perbaikan cara inisialisasi MovieAdapter (ListAdapter tidak butuh list di constructor)
-        recommendationsAdapter = MovieAdapter(null) { movie ->
-            onMovieClicked(movie)
-        }
-=======
         handleArgumentsForScroll()
         setupSearch()
         setupThemeToggle()
@@ -100,7 +90,7 @@ class HomeFragment : Fragment() {
             binding.searchBar.setHintTextColor(ContextCompat.getColor(context, R.color.gray_light))
             binding.searchBar.setTextColor(Color.WHITE)
             
-            // Card Dark (Satu warna gelap)
+            // Card Dark
             binding.featuredMovieCard.setCardBackgroundColor(Color.TRANSPARENT)
             binding.featuredContentLayout.setBackgroundResource(R.drawable.rounded_edittext)
             binding.featuredContentLayout.backgroundTintList = null
@@ -109,14 +99,14 @@ class HomeFragment : Fragment() {
         } else {
             binding.root.setBackgroundColor(brandColor)
             
-            // Search Bar Light (Warna persis seperti di gambar kamu)
+            // Search Bar Light
             binding.searchBar.setBackgroundResource(R.drawable.rounded_edittext)
             binding.searchBar.backgroundTintList = ColorStateList.valueOf(whiteTrans)
             binding.searchBar.setHintTextColor(darkPurple)
             binding.searchBar.setTextColor(darkPurple)
             
-            // Card Light (SAMAKAN dengan Search Bar - 1 Warna)
-            binding.featuredMovieCard.setCardBackgroundColor(Color.TRANSPARENT) // Card luarnya transparan
+            // Card Light
+            binding.featuredMovieCard.setCardBackgroundColor(Color.TRANSPARENT)
             binding.featuredContentLayout.setBackgroundResource(R.drawable.rounded_edittext)
             binding.featuredContentLayout.backgroundTintList = ColorStateList.valueOf(whiteTrans)
             
@@ -163,7 +153,7 @@ class HomeFragment : Fragment() {
     private fun performSearch(query: String) {
         searchJob?.cancel()
         searchJob = viewLifecycleOwner.lifecycleScope.launch {
-            delay(500) // Debounce
+            delay(500)
             try {
                 binding.progressBar.visibility = View.VISIBLE
                 val response = withContext(Dispatchers.IO) {
@@ -192,25 +182,18 @@ class HomeFragment : Fragment() {
 
     private fun setupRecyclerViews() {
         recommendationsAdapter = MovieAdapter { movie -> onMovieClicked(movie) }
->>>>>>> f64f4956950dbb7c1aa94ea6d268a10e174579de
         binding.rvRecommendations.apply {
             layoutManager = LinearLayoutManager(context, LinearLayoutManager.HORIZONTAL, false)
             adapter = recommendationsAdapter
         }
 
-<<<<<<< HEAD
-        newReleasesAdapter = MovieAdapter(null) { movie ->
-            onMovieClicked(movie)
-        }
-=======
         newReleasesAdapter = MovieAdapter { movie -> onMovieClicked(movie) }
->>>>>>> f64f4956950dbb7c1aa94ea6d268a10e174579de
         binding.rvNewReleases.apply {
             layoutManager = LinearLayoutManager(context, LinearLayoutManager.HORIZONTAL, false)
             adapter = newReleasesAdapter
         }
 
-        searchResultsAdapter = MovieAdapter { movie -> onMovieClicked(movie) }
+        searchResultsAdapter = MovieAdapter(useGridLayout = false) { movie -> onMovieClicked(movie) }
         binding.rvHomeSearchResults.apply {
             layoutManager = LinearLayoutManager(context)
             adapter = searchResultsAdapter
@@ -219,9 +202,6 @@ class HomeFragment : Fragment() {
 
     private fun observeViewModel() {
         viewModel.isLoading.observe(viewLifecycleOwner) { isLoading ->
-<<<<<<< HEAD
-            binding.progressBar.visibility = if (isLoading) View.VISIBLE else View.GONE
-=======
             if (isLoading) {
                 showShimmer(true)
             } else {
@@ -229,7 +209,6 @@ class HomeFragment : Fragment() {
                     showShimmer(false)
                 }
             }
->>>>>>> f64f4956950dbb7c1aa94ea6d268a10e174579de
         }
 
         viewModel.popularMovies.observe(viewLifecycleOwner) { movies ->
@@ -239,20 +218,6 @@ class HomeFragment : Fragment() {
         }
 
         viewModel.topRatedMovies.observe(viewLifecycleOwner) { movies ->
-<<<<<<< HEAD
-            movies?.let { recommendationsAdapter.submitList(it) }
-        }
-
-        viewModel.nowPlayingMovies.observe(viewLifecycleOwner) { movies ->
-            movies?.let { newReleasesAdapter.submitList(it) }
-        }
-
-        viewModel.errorMessage.observe(viewLifecycleOwner) { error ->
-            error?.let { 
-                if (it.isNotEmpty()) {
-                    Toast.makeText(context, it, Toast.LENGTH_LONG).show()
-                }
-=======
             movies?.let { recommendationsAdapter?.submitList(it) }
         }
 
@@ -263,7 +228,6 @@ class HomeFragment : Fragment() {
         viewModel.errorMessage.observe(viewLifecycleOwner) { error ->
             if (!error.isNullOrEmpty() && isAdded) {
                 Toast.makeText(context, error, Toast.LENGTH_LONG).show()
->>>>>>> f64f4956950dbb7c1aa94ea6d268a10e174579de
             }
         }
     }
@@ -296,8 +260,6 @@ class HomeFragment : Fragment() {
             crossfade(true)
             placeholder(R.drawable.login_bg_gradient)
         }
-<<<<<<< HEAD
-=======
 
         viewLifecycleOwner.lifecycleScope.launch {
             try {
@@ -311,7 +273,6 @@ class HomeFragment : Fragment() {
                 }
             } catch (e: Exception) { /* Ignore */ }
         }
->>>>>>> f64f4956950dbb7c1aa94ea6d268a10e174579de
         
         binding.featuredMovieCard.setOnClickListener {
             onMovieClicked(movie)
@@ -319,14 +280,10 @@ class HomeFragment : Fragment() {
     }
 
     private fun onMovieClicked(movie: Movie) {
-<<<<<<< HEAD
-        Toast.makeText(context, "Clicked: ${movie.title}", Toast.LENGTH_SHORT).show()
-=======
         if (isAdded) {
             val bundle = Bundle().apply { putInt("movieId", movie.id) }
             findNavController().navigate(resId = R.id.movieDetailFragment, args = bundle)
         }
->>>>>>> f64f4956950dbb7c1aa94ea6d268a10e174579de
     }
 
     override fun onDestroyView() {
