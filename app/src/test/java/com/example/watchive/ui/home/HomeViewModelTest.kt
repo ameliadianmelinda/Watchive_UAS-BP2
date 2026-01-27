@@ -10,6 +10,7 @@ import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.test.*
 import org.junit.After
 import org.junit.Assert.assertEquals
+import org.junit.Assert.assertNotNull
 import org.junit.Assert.assertTrue
 import org.junit.Before
 import org.junit.Rule
@@ -38,36 +39,44 @@ class HomeViewModelTest {
 
     @Test
     fun `when fetchAllMovies is successful, it should update LiveData with movies`() = runTest {
-        // Given: Skenario Berhasil (API mengembalikan data kosong)
+        // Given: Mock response sukses dengan list kosong
+        // Sesuaikan parameter MoviesResponse dengan constructor aslinya (page, movies, totalPages, totalResults)
         val mockResponse = MoviesResponse(1, emptyList(), 1, 0)
-        coEvery { apiService.getPopularMovies() } returns Response.success(mockResponse)
-        coEvery { apiService.getTopRatedMovies(page = 1) } returns Response.success(mockResponse)
-        coEvery { apiService.getNowPlayingMovies(page = 1) } returns Response.success(mockResponse)
+        
+        // Gunakan any() untuk berjaga-jaga jika ada default parameter (seperti API Key) yang terpanggil
+        coEvery { apiService.getPopularMovies(any(), any()) } returns Response.success(mockResponse)
+        coEvery { apiService.getTopRatedMovies(any(), any()) } returns Response.success(mockResponse)
+        coEvery { apiService.getNowPlayingMovies(any(), any()) } returns Response.success(mockResponse)
 
-        // When: Panggil fungsi
+        // When: Inisialisasi ViewModel (akan memanggil fetchAllMovies di init)
         viewModel = HomeViewModel(apiService)
+        
+        // Memberikan waktu bagi coroutine untuk menyelesaikan tugasnya
         advanceUntilIdle()
 
-        // Then: Pastikan data masuk (size 0 karena mock kita emptyList)
+        // Then: Verifikasi data
+        assertNotNull(viewModel.popularMovies.value)
         assertEquals(0, viewModel.popularMovies.value?.size)
         assertEquals(false, viewModel.isLoading.value)
     }
 
     @Test
     fun `when fetchAllMovies fails, it should show error message in LiveData`() = runTest {
-        // Given: Skenario Gagal (API dipaksa lempar Error/Exception)
+        // Given: Mock API melempar Exception
         val errorMessage = "No Internet Connection"
-        coEvery { apiService.getPopularMovies() } throws Exception(errorMessage)
+        coEvery { apiService.getPopularMovies(any(), any()) } throws Exception(errorMessage)
 
-        // When: Panggil fungsi
+        // When: Inisialisasi ViewModel
         viewModel = HomeViewModel(apiService)
+        
         advanceUntilIdle()
 
-        // Then: Pastikan pesan error muncul di LiveData errorMessage
+        // Then: Verifikasi pesan error muncul
         val actualError = viewModel.errorMessage.value
+        assertNotNull("Error message should not be null", actualError)
         assertTrue(actualError?.contains(errorMessage) == true)
         
-        // Pastikan loading tetap berhenti (false) meskipun error
+        // Loading harus berhenti (false) meskipun terjadi error
         assertEquals(false, viewModel.isLoading.value)
     }
 }
